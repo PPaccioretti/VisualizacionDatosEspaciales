@@ -1,2 +1,2 @@
 # VisualizacionDatosEspaciales
-Presentación y diaposutivas del curso Visualizacion de Datos espaciales en R
+Presentación y diapositivas del curso Visualizacion de Datos espaciales en R
