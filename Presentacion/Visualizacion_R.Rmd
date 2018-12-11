@@ -1,0 +1,42 @@
+---
+title: "Congreso - Escuela en Estadística espacial"
+subtitle: "Visualización de Datos espaciales en R"
+author: 
+- Mariano Córdoba 
+- Cecilia Bruno
+- Franca Giannini Kurina
+- Pablo Paccioretti
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Temas
+1. Lectura de objetos espaciales desde diferentes tipos de formatos
+    + Raster
+    + Multipolígono
+    + Base de datos (*data frame*)
+2. Paquete `sf`
+    + Proyección y reproyección
+    + Análisis
+3. Visualización interactiva con `mapview`
+4. Visualización para publicación con `ggplot`
+
+## Lectura de objetos espaciales desde diferentes tipos de formatos
+
+
+## Paquete `sf`
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+## Visualización interactiva con `mapview`
+
+```{r pressure}
+plot(pressure)
+```
+
+## Visualización para publicación con `ggplot`
