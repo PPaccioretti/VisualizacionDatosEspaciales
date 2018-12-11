@@ -1,42 +1,201 @@
 ---
 title: "Congreso - Escuela en Estadística espacial"
-subtitle: "Visualización de Datos espaciales en R"
+subtitle: "Visualización de datos geoespaciales en R"
 author: 
-- Mariano Córdoba 
-- Cecilia Bruno
-- Franca Giannini Kurina
-- Pablo Paccioretti
-output: ioslides_presentation
+  Mariano Córdoba   
+  - Cecilia Bruno
+  - Franca Giannini Kurina
+  - Pablo Paccioretti
+output: 
+  ioslides_presentation:
+    widescreen: true
+    transition: faster
+    css: myfonts.css
+  slidy_presentation: default
+  beamer_presentation: default
+bibliography: biblio.bib
+# csl: apa-espanol.csl
+classoption: "aspectratio=169"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Temas
-1. Lectura de objetos espaciales desde diferentes tipos de formatos
-    + Raster
-    + Multipolígono
+1. Lectura de archivos de diferentes formatos
     + Base de datos (*data frame*)
-2. Paquete `sf`
+    + Multipolígono
+    + Raster
+2. Manejo de archivos espaciales con `sf`
     + Proyección y reproyección
     + Análisis
 3. Visualización interactiva con `mapview`
-4. Visualización para publicación con `ggplot`
+4. Visualización para publicación con `ggplot2`
 
-## Lectura de objetos espaciales desde diferentes tipos de formatos
+Esta presentación y los datos utilizados está en https://github.com/PPaccioretti/VisualizacionDatosEspaciales
 
+#Paquete `sf`
 
-## Paquete `sf`
+----
 
-```{r cars, echo = TRUE}
-summary(cars)
+El paquete `sf` permite un análisis y manejo de archivos espaciales. 
+
+*Simple features* es una manera estandarizada de codificar en computadoras datos vectoriales (puntos, lineas, polígonos). El paquete `sf` implementa *simple features* en R y tiene la misma capacidad para datos vectoriales como los paquetes `sp`, `rgeos` y `rgdal` [@RJ]. 
+
+- Los objetos espaciales `sf` extienden al `data.frame` con una *geometry list-column* 
+- Siempre se puede deshacer un objeto `sf` y pasarlo a `data.frame`, el cual tendrá una columna-lista
+- Las funciones/métodos comienzan con `st_`
+- Los objetos espaciales `sf` son `data.frame`s
+
+#Lectura de archivos
+
+---
+
+Carga e instalación de librerías para los procedimientos
+
+```{r, message=FALSE}
+libs <- c("sf","raster", "ggplot2","mapview")
+
+new.packages <- libs[!(libs %in% rownames(installed.packages()))]
+if(length(new.packages)) install.packages(new.packages)
+
+invisible(sapply(libs, library,character.only = T, quietly=T))
 ```
+
+
+## Lectura de archivo Raster
+
+raster data don't fit easily in the simple feature framework: is a raster pixel a point, or a small polygon, or some kind of convolution centered over the pixel center?
+raster data come up often for continuous phenomena, when the "thing"-ness of features doesn't work out (well): is a pixel a thing? is a raster a thing? does the raster contain a thing?
+package raster is powerful, and works well with pipes
+simple features don't scale for raster / imagery data
+(long) time series on features do neither
+
+```{r}
+DEM<-raster("../Datos/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif")
+```
+
+```{r}
+DEM
+```
+
+## Lectura de archivo .shp
+
+```{r}
+Departamentos<-st_read("../Datos/deptos_cba_cg")
+```
+
+## Lectura de archivo de texto
+Al usar la función `read.table` la clase del objeto generado será `data.frame`.
+```{r}
+Suelos<-read.table("../Datos/suelos.txt", header=T)
+```
+
+Cambio a clase espacial (`sf`). Es importante indicar cual es la proyección de la base de datos mediante el argumento `crs = `. Si no se le especifica no tomará ningún sistema de coordenadas de referencia.
+```{r}
+Suelossf<-st_as_sf(Suelos,coords = c("Xt","Yt"),  crs = 32720)
+```
+
+## En que proyecciones están estos objetos?
+
+```{r}
+st_crs(Departamentos)
+st_crs(Suelossf)
+st_crs(DEM)
+```
+
+## Reproyectemos el sistema de coordenadas de referencia 
+```{r}
+st_crs(Departamentos) <- 4326
+```
+
+Para reproyectar el objeto `Departamentos` podemos tomar la proyección del objeto `Suelossf` como referencia
+```{r}
+Departamentos<-st_transform(Departamentos,st_crs(Suelossf))
+```
+
+
+
+
 
 ## Visualización interactiva con `mapview`
-
-```{r pressure}
-plot(pressure)
+```{r, eval=FALSE}
+## S4 method for signature 'sf'
+mapView(x, map = NULL, pane = "auto",
+  canvas = useCanvas(x), viewer.suppress = canvas, zcol = NULL,
+  burst = FALSE, color = mapviewGetOption("vector.palette"),
+  col.regions = mapviewGetOption("vector.palette"), at = NULL,
+  na.color = mapviewGetOption("na.color"), cex = 6,
+  lwd = lineWidth(x), alpha = 0.9, alpha.regions = regionOpacity(x),
+  na.alpha = regionOpacity(x), map.types = NULL,
+  verbose = mapviewGetOption("verbose"), popup = popupTable(x),
+  layer.name = NULL, label = makeLabels(x, zcol),
+  legend = mapviewGetOption("legend"), legend.opacity = 1,
+  homebutton = TRUE, native.crs = FALSE,
+  highlight = mapviewHighlightOptions(x, alpha.regions, alpha, lwd),
+  maxpoints = getMaxFeatures(x), ...)
 ```
 
+
+----
+
+Se puede ver una capa:
+```{r}
+mapview(Departamentos)
+```
+
+----
+
+Colorear por valores numéricos de una columna
+```{r}
+mapview(Departamentos, zcol='st_area_sh')
+```
+
+----
+Colorear por valores categóricos de una columna
+```{r, echo = TRUE}
+mapview(Departamentos, zcol='departa')
+
+```
+
+----
+Diferentes tipos de mapas de base
+```{r, echo = TRUE}
+mapview(Departamentos, zcol='departa', map.types = c("OpenStreetMap","CartoDB.DarkMatter"))
+
+```
+
+----
+Seleccionar las categorias que deseamos ver
+```{r}
+mapview(Suelossf, legend=TRUE, cex="pH")
+```
+
+## Multiples capas en un solo mapa
+```{r}
+mapview(DEM) + Suelossf
+```
+
+
 ## Visualización para publicación con `ggplot`
+
+```{r}
+ggplot(Suelossf) + geom_sf()
+```
+
+##
+```{r}
+ggplot(Departamentos) + geom_sf(aes(fill=st_area_sh))
+```
+
+
+## Cisualización de objeto de clase `RasterLayer`
+```{r}
+spplot(DEM)
+```
+
+
+
+## Referencias
