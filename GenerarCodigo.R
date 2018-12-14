@@ -1,2 +1,2 @@
-knitr::purl("./Presentacion/Visualizacion_R.Rmd", output = "CodigoDeLaPresentacion.R", documentation = 1)
+knitr::purl("./index.Rmd", output = "CodigoDeLaPresentacion.R", documentation = 1)
 

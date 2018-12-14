@@ -11,11 +11,6 @@ knitr::knit_hooks$set(
      paste('\n\n<div class="alert alert-warning" style="background-color:#ffff66">',
            gsub('##', '\n', gsub('^##\ Warning:', '**Warning**', x)),
            '</div>', sep = '\n')
-   },
-   message = function(x, options) {
-     paste('\n\n<div class="alert alert-info" style="background-color:#47d147">',
-           gsub('##', '\n', x),
-           '</div>', sep = '\n')
    }
 )
 
@@ -30,7 +25,7 @@ if(length(new.packages)) install.packages(new.packages)
 invisible(sapply(libs, library,character.only = T, quietly=T))
 
 ## ------------------------------------------------------------------------
-Departamentos<-st_read("../Datos/deptos_cba_cg")
+Departamentos<-st_read("./Datos/deptos_cba_cg")
 
 ## ------------------------------------------------------------------------
 class(Departamentos)
@@ -40,7 +35,7 @@ st_crs(Departamentos)
 
 
 ## ------------------------------------------------------------------------
-Suelos<-read.table("../Datos/suelos.txt", header=T)
+Suelos<-read.table("./Datos/suelos.txt", header=T)
 
 ## ------------------------------------------------------------------------
 Suelossf<-st_as_sf(Suelos,coords = c("Xt","Yt"))
@@ -63,6 +58,8 @@ head(Suelossf)
 
 ## ------------------------------------------------------------------------
 st_geometry(Departamentos)
+
+## ------------------------------------------------------------------------
 st_geometry(Suelossf)
 
 ## ------------------------------------------------------------------------
@@ -118,7 +115,7 @@ Departamentos$MOSMedia<- MediasMOS
 Departamentos$MOSMediaCAT<-MediaMosCAT
 
 ## ------------------------------------------------------------------------
-(DEM<-raster("../Datos/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif"))
+(DEM<-raster("./Datos/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif"))
 
 ## ------------------------------------------------------------------------
 st_crs(DEM)
@@ -195,8 +192,48 @@ ggplot(Suelossf) + geom_sf()
 ggplot(Departamentos) + geom_sf(aes(fill=st_area_sh))
 
 ## ------------------------------------------------------------------------
-spplot(DEM)
+ggplot(Departamentos) +
+   geom_sf(aes(fill = st_area_sh)) +
+   geom_sf_label(aes(label = cabecer))
+
 
 ## ------------------------------------------------------------------------
+ggplot(Departamentos) +
+   geom_sf(aes(fill = st_area_sh)) +
+   geom_sf_label(aes(label = cabecer), size=2.5)
+
+
+## ------------------------------------------------------------------------
+
+Departamentos$Cent <- st_centroid(Departamentos$geometry)
+ggplot(Departamentos) +
+  geom_sf(colour = "blue") +
+  geom_sf(aes(geometry = Cent, size = st_area_sh), show.legend = "point")
+
+
+## ------------------------------------------------------------------------
+ggplot(Departamentos) +
+  geom_sf(data= Departamentos,colour = "blue") +
+  geom_sf(data= Departamentos,aes(geometry = Cent, size = st_area_sh), show.legend = "point") +
+  geom_sf(data=Suelossf)
+
+## ------------------------------------------------------------------------
+ggplot(Departamentos) +
+  geom_sf(data= Departamentos,colour = "blue") +
+  geom_sf(data= Departamentos,aes(geometry = Cent, size = st_area_sh), show.legend = "point") +
+  geom_sf(data=Suelossf, colour='#E67E22')
+
+## ------------------------------------------------------------------------
+ggplot() + 
+  geom_sf(data=Departamentos, color = "gray30", lwd=2, fill=NA) +
+  geom_sf(data=Suelossf, fill = NA, show.legend = F, color="gray50", lwd=0.4) +
+  geom_sf_label(data=Suelossf,aes(label = ID_2), size=1) +
+  labs(title="Muestras de Suelo", y="Latitud", x="Longitud") +
+  theme_bw()
+
+## ------------------------------------------------------------------------
+spplot(DEM)
+
+## ---- warning=FALSE------------------------------------------------------
 mapview(DEM, col.regions=viridisLite::viridis)
 
