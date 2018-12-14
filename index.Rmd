@@ -429,9 +429,9 @@ mapview(Departamentos, color="blue") + mapview(Suelossf, color = "grey40",col.re
 
 # Visualización para publicación con `ggplot2`
 
-`ggplot2` (@ggplot) es un paquete que permite la creación de gráficos elegantes y complejos. Es muy popular en la comunidad de R, donde tomó gran importancia en los últimos años. 
-
 ----
+
+`ggplot2` (@ggplot) es un paquete que permite la creación de gráficos elegantes y complejos. Es muy popular en la comunidad de R, donde tomó gran importancia en los últimos años. 
 
 ```{r}
 ggplot(Suelossf) + geom_sf()
