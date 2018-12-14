@@ -20,19 +20,37 @@ classoption: "aspectratio=169"
 
 ```{r setup, include=FALSE}
 library(knitr)
+
+knitr::knit_hooks$set(
+   error = function(x, options) {
+     paste('\n\n<div class="alert alert-danger" style="background-color:#ffb3b3">',
+           gsub('##', '\n', gsub('^##\ Error', '**Error**', x)),
+           '</div>', sep = '\n')
+   },
+   warning = function(x, options) {
+     paste('\n\n<div class="alert alert-warning" style="background-color:#ffff66">',
+           gsub('##', '\n', gsub('^##\ Warning:', '**Warning**', x)),
+           '</div>', sep = '\n')
+   },
+   message = function(x, options) {
+     paste('\n\n<div class="alert alert-info" style="background-color:#47d147">',
+           gsub('##', '\n', x),
+           '</div>', sep = '\n')
+   }
+)
+
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Temas
-1. Lectura de archivos de diferentes formatos
-    + Base de datos (*data frame*)
-    + Multipolígono
-    + Raster
-2. Manejo de archivos espaciales con `sf`
+1. Manejo de archivos espaciales con `sf`
+    + Lectura de archivos de diferentes formatos
+        - Shapefile
+        - Base de datos de texto (*data frame*)
     + Proyección y reproyección
-    + Análisis
-3. Visualización interactiva con `mapview`
-4. Visualización para publicación con `ggplot2`
+    + Manejo de objetos `sf`
+1. Visualización interactiva con `mapview`
+1. Visualización para publicación con `ggplot2`
 
 Esta presentación y los datos utilizados está en https://github.com/PPaccioretti/VisualizacionDatosEspaciales
 
@@ -56,7 +74,7 @@ El paquete `sf` permite un análisis y manejo de archivos espaciales.
 Carga e instalación de librerías para los procedimientos
 
 ```{r, message=FALSE}
-libs <- c("sf","raster", "ggplot2","mapview")
+libs <- c("sf","raster", "ggplot2","mapview","units")
 
 new.packages <- libs[!(libs %in% rownames(installed.packages()))]
 if(length(new.packages)) install.packages(new.packages)
@@ -65,27 +83,46 @@ invisible(sapply(libs, library,character.only = T, quietly=T))
 ```
 
 
-## Lectura de archivo Raster
+## Lectura de archivo *shapefile*
 
-raster data don't fit easily in the simple feature framework: is a raster pixel a point, or a small polygon, or some kind of convolution centered over the pixel center?
-raster data come up often for continuous phenomena, when the "thing"-ness of features doesn't work out (well): is a pixel a thing? is a raster a thing? does the raster contain a thing?
-package raster is powerful, and works well with pipes
-simple features don't scale for raster / imagery data
-(long) time series on features do neither
+*Shapefiles* consisten en varios archivos con el mimso nombre base que residen en el mismo directorio. Una de ellas tiene la extensión .shp
 
-```{r}
-DEM<-raster("../Datos/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif")
-```
+- .shp: es el archivo principal que almacena la geometría de la entidad
+- .shx: es el archivo de índice que almacena el índice de la geometría de la entidad
+- .dbf: es la tabla dBASE que almacena la información de atributos de las entidades
+- .prj: es el archivo que almacena información del sistema de coordenadas
+- .xml: metadatos de ArcGIS, es el archivo que almacena información sobre el shapefile
+- .sbn y .sbx: son los archivos que almacenan el índice espacial de las entidades
 
-```{r}
-DEM
-```
+Los tres primeros son obligatorios.
 
-## Lectura de archivo .shp
+<!-- .fbn y .fbx: son los archivos que almacenan el índice espacial de las entidades para los shapefiles que son solo de lectura. -->
+<!-- .ain y .aih: son los archivos que almacenan el índice de atributo de los campos activos en una tabla o una tabla de atributos del tema. -->
+<!-- .atx: se crea un archivo .atx para cada shapefile o índice de atributos de shapefile dBase creado en ArcCatalog. ArcGIS no utiliza los índices de atributo de ArcView GIS 3.x de los archivos shapefile y dBase. Se ha creado un nuevo modelo de indexación de atributos para los archivos shapefile y dBase. -->
+<!-- .ixs: índice de geocodificación para los shapefiles de lectura y escritura. -->
+<!-- .mxs: índice de geocodificación para los shapefiles de lectura y escritura (formato ODB). -->
+<!-- .cpg: es un archivo opcional que se puede utilizar para especificar la página de código para identificar el conjunto de caracteres que se va a utilizar. -->
+
+----
+
 
 ```{r}
 Departamentos<-st_read("../Datos/deptos_cba_cg")
 ```
+
+
+```{r}
+class(Departamentos)
+```
+
+----
+
+Dado el formato desde el cual se creó el objeto `Departamentos` tiene un sistema de coordenadas de referencia.
+```{r}
+st_crs(Departamentos)
+
+```
+
 
 ## Lectura de archivo de texto
 Al usar la función `read.table` la clase del objeto generado será `data.frame`.
@@ -93,34 +130,211 @@ Al usar la función `read.table` la clase del objeto generado será `data.frame`
 Suelos<-read.table("../Datos/suelos.txt", header=T)
 ```
 
-Cambio a clase espacial (`sf`). Es importante indicar cual es la proyección de la base de datos mediante el argumento `crs = `. Si no se le especifica no tomará ningún sistema de coordenadas de referencia.
+Este `data.frame` no es un objeto espacial para R. Por lo que es necesario cambiarlo a clase `sf`, para poder trabajarlo como tal.
+
+```{r}
+Suelossf<-st_as_sf(Suelos,coords = c("Xt","Yt"))
+```
+
+```{r}
+st_crs(Suelossf)
+```
+
+----
+
+```{r}
+head(Suelossf)
+```
+
+
+----
+
+Es importante indicar cual es la proyección de la base de datos mediante el argumento `crs = `. Si no se le especifica no tomará ningún sistema de coordenadas de referencia.
+
 ```{r}
 Suelossf<-st_as_sf(Suelos,coords = c("Xt","Yt"),  crs = 32720)
 ```
 
-## En que proyecciones están estos objetos?
+```{r}
+st_crs(Suelossf)
 
+```
+
+----
+
+```{r}
+head(Suelossf)
+```
+
+----
+## Geometría de los objetos
+
+```{r}
+st_geometry(Departamentos)
+st_geometry(Suelossf)
+```
+
+#Manejo de objetos espaciales
+
+## Proyecciones de los objetos
+
+Ya vimos la función `sf::st_crs()` para ver cual sistema de coordenadas de referencia tienen nuestros objetos 
 ```{r}
 st_crs(Departamentos)
 st_crs(Suelossf)
-st_crs(DEM)
 ```
 
-## Reproyectemos el sistema de coordenadas de referencia 
+## Reproyectar el sistema de coordenadas de referencia 
 ```{r}
-st_crs(Departamentos) <- 4326
+st_crs(Departamentos)
 ```
 
 Para reproyectar el objeto `Departamentos` podemos tomar la proyección del objeto `Suelossf` como referencia
+
 ```{r}
 Departamentos<-st_transform(Departamentos,st_crs(Suelossf))
 ```
 
+----
+
+```{r}
+st_crs(Departamentos)
+```
 
 
 
+## Distancia entre puntos
 
-## Visualización interactiva con `mapview`
+```{r}
+st_distance(Suelossf)
+```
+
+----
+
+- Distancia media entre todos los puntos
+
+```{r}
+DistanciasSuelo<-st_distance(Suelossf)
+mean(DistanciasSuelo)
+```
+
+----
+
+- Distancia media entre puntos diferentes
+
+```{r, error=TRUE}
+DistMedia<-mean(DistanciasSuelo[DistanciasSuelo!=0])
+```
+
+
+```{r}
+(DistMedia<-mean(DistanciasSuelo[DistanciasSuelo!=units::as_units(0,"m")]))
+units(DistMedia) <- as_units("km")
+DistMedia
+```
+
+
+## Conteo de puntos dentro de polígonos
+
+```{r}
+st_covers(Departamentos,Suelossf)
+```
+
+----
+
+```{r}
+lengths(st_covers(Departamentos,Suelossf))
+```
+
+
+----
+
+```{r}
+head(DepartConMuestras<-data.frame("Muestras"=lengths(st_covers(Departamentos,Suelossf)),Departamentos))
+```
+----
+
+
+```{r}
+kable(table(rep(Departamentos$departa, lengths(st_covers(Departamentos,Suelossf)))))
+```
+
+
+## Media de una variable por departamento
+
+```{r}
+(MediasMOS<-sapply(st_covers(Departamentos,Suelossf), function(x, datos,columna){
+  mean(datos[x,columna,drop=T],na.rm=T)}, datos=Suelossf, columna="MOS"))
+```
+```{r}
+
+MediaMosCAT<-cut(MediasMOS,3)
+```
+
+----
+
+Creamos dos nuevas columnas (`MOSMedia`,`MOSMediaCAT`) en el objeto `Departamentos` con los valores numericos y categóricos de las medias de MOS.
+```{r}
+Departamentos$MOSMedia<- MediasMOS
+Departamentos$MOSMediaCAT<-MediaMosCAT
+```
+
+
+## Lectura de archivo Raster (.tif)
+
+Dado las características del archivos raster, no son escalables para ser tratados como *simple feature*. El paquete `raster` es específico para el manejo de este tipo de archivos.
+
+Lectura del archivo de formato .tif
+
+```{r}
+(DEM<-raster("../Datos/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif"))
+```
+
+----
+
+Notemos que `st_crs()` no funciona en objetos de clase `r class(DEM)`.
+
+```{r}
+st_crs(DEM)
+```
+
+por lo que hay que utilizar la función `raster::crs`. 
+
+```{r}
+raster::crs(DEM)
+```
+
+```{r}
+DEMrp<-projectRaster(DEM, crs=st_crs(Departamentos)$proj4string)# crs(DEM)
+DepDEM<-extract(x=DEMrp, y=Departamentos, fun=mean, df=T,sp=T)
+
+class(DepDEM)
+```
+----
+
+```{r}
+DepDEMsf<-st_as_sf(DepDEM)
+names(DepDEMsf)
+```
+
+#Visualización de datos geoespaciales
+
+----
+
+Gráficos por defecto con el paquete `sf` 
+
+```{r}
+plot(Suelossf)
+```
+
+
+
+# Visualización interactiva con `mapview`
+
+----
+
+`mapview` es un paquete de R creado para ayudar al investigador durante su trabajo en el análisis de datos espaciales. Provee funciones para crear visualizaciones interactivas de datos espaviales de una manera muy rápida. Con `mapview` se puede visualizar los datos espaciales junto con sus atributos y geometrías.
+
 ```{r, eval=FALSE}
 ## S4 method for signature 'sf'
 mapView(x, map = NULL, pane = "auto",
@@ -138,62 +352,103 @@ mapView(x, map = NULL, pane = "auto",
   maxpoints = getMaxFeatures(x), ...)
 ```
 
-
 ----
 
-Se puede ver una capa:
+Visualicemos una capa
 ```{r}
 mapview(Departamentos)
 ```
 
 ----
 
-Colorear por valores numéricos de una columna
+Colorear por valores numéricos
 ```{r}
 mapview(Departamentos, zcol='st_area_sh')
 ```
 
-----
-Colorear por valores categóricos de una columna
-```{r, echo = TRUE}
-mapview(Departamentos, zcol='departa')
+---
 
+Colorear por valores numéricos
+```{r}
+mapview(Departamentos, zcol="MOSMedia")
+```
+
+
+----
+Colorear por valores categóricos
+```{r, echo = TRUE}
+mapview(Departamentos, zcol='MOSMediaCAT')
 ```
 
 ----
-Diferentes tipos de mapas de base
+
+Generar las categorías por los intervalos que especifiquemos
+```{r, echo = TRUE}
+mapview(Departamentos, zcol='MOSMedia',at=seq(min(Departamentos$MOSMedia),max(Departamentos$MOSMedia),length=5 ))
+```
+
+----
+
+Seleccionar las categorías que deseamos ver de manera interactiva
+```{r, echo = TRUE}
+mapview(Departamentos, zcol='MOSMediaCAT', burst=TRUE)
+```
+
+
+----
+
+Diferentes tipos de mapas base
 ```{r, echo = TRUE}
 mapview(Departamentos, zcol='departa', map.types = c("OpenStreetMap","CartoDB.DarkMatter"))
 
 ```
 
+
 ----
-Seleccionar las categorias que deseamos ver
+Mapa de Puntos espaciales
 ```{r}
 mapview(Suelossf, legend=TRUE, cex="pH")
 ```
 
 ## Multiples capas en un solo mapa
 ```{r}
-mapview(DEM) + Suelossf
+mapview(Departamentos) + Suelossf
 ```
 
 
-## Visualización para publicación con `ggplot`
+## Cambio de las opciones generales de `mapview`
+
+```{r}
+mapviewOptions(basemaps = c("CartoDB.Positron","Esri.WorldShadedRelief", "OpenStreetMap.DE"),
+               layers.control.pos = "bottomright")
+mapview(Departamentos, color="blue") + mapview(Suelossf, color = "grey40",col.regions = "red")
+```
+
+# Visualización para publicación con `ggplot2`
+
+`ggplot2` es un paquete que permite la creación de gráficos elegantes y complejos. Es muy popular en la comunidad de R, donde tomó gran importancia en los últimos años. 
+
+----
 
 ```{r}
 ggplot(Suelossf) + geom_sf()
 ```
 
-##
+----
 ```{r}
 ggplot(Departamentos) + geom_sf(aes(fill=st_area_sh))
 ```
 
 
-## Cisualización de objeto de clase `RasterLayer`
+## Visualización de objeto de clase `RasterLayer`
 ```{r}
 spplot(DEM)
+```
+
+----
+
+```{r}
+mapview(DEM, col.regions=viridisLite::viridis)
 ```
 
 
