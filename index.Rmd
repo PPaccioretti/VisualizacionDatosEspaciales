@@ -334,7 +334,7 @@ plot(Suelossf)
 
 ----
 
-`mapview` es un paquete de R creado para ayudar al investigador durante su trabajo en el análisis de datos espaciales. Provee funciones para crear visualizaciones interactivas de datos espaciales de una manera muy rápida. Con `mapview` se puede visualizar los datos espaciales junto con sus atributos y geometrías.
+`mapview` (@mapview) es un paquete de R creado para ayudar al investigador durante su trabajo en el análisis de datos espaciales. Provee funciones para crear visualizaciones interactivas de datos espaciales de una manera muy rápida. Con `mapview` se puede visualizar los datos espaciales junto con sus atributos y geometrías.
 
 ```{r, eval=FALSE}
 ## S4 method for signature 'sf'
@@ -429,7 +429,7 @@ mapview(Departamentos, color="blue") + mapview(Suelossf, color = "grey40",col.re
 
 # Visualización para publicación con `ggplot2`
 
-`ggplot2` es un paquete que permite la creación de gráficos elegantes y complejos. Es muy popular en la comunidad de R, donde tomó gran importancia en los últimos años. 
+`ggplot2` (@ggplot) es un paquete que permite la creación de gráficos elegantes y complejos. Es muy popular en la comunidad de R, donde tomó gran importancia en los últimos años. 
 
 ----
 
