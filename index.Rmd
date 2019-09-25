@@ -1,29 +1,70 @@
 ---
-title: "Congreso - Escuela en Estadística espacial"
+title: "II Congreso - Escuela en Estadística espacial"
 subtitle: "Visualización de datos geoespaciales en R"
-author:
-  Pablo Paccioretti
-  - Franca Giannini Kurina
-  - Mariano Córdoba   
-  - Cecilia Bruno
-output: 
-  ioslides_presentation:
-    widescreen: true
-    transition: faster
-    css: myfonts.css
-  slidy_presentation: default
-  beamer_presentation: default
-bibliography: biblio.bib
-classoption: "aspectratio=169"
+author: |
+  Pablo Paccioretti<br>
+  Cecilia Bruno<br>
+  <span style = 'font-size: 70%;'>
+  Facultad de Ciencias Agropecuaras - UNC - CONICET</span>
+#date: |
+#  Esto es un Ejemplo<br><br>
+#  `r icon::fa("link")` [bit.ly/jlt-rmed2018](https://bit.ly/jlt-rmed2018)
+#  <br>`r icon::fa("twitter")` [jent103](https://twitter.com/jent103)
+output:
+  xaringan::moon_reader:
+    css: [xaringan-themer.css, myfonts.css]
+    seal: true
+    nature:
+      countIncrementalSlides: false
+      highlightStyle: github
+      highlightLines: true
+      ratio: '16:9'
+      slideNumberFormat: |
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: calc(%current% / %total% * 100%);">
+          </div>
+        </div>
+      titleSlideClass: ["left", "middle", "inverse"]
+      # chakra: libs/remark-latest.min.js
+      # df_print: paged
+# css: ["tamu"]
+  # css: ["fc", "fc-fonts"]
+  # revealjs::revealjs_presentation:
+  #   transition: fade
+  # ioslides_presentation:
+  #   widescreen: true
+  #   transition: faster
+  #   css: myfonts.css
+  #   logo: images/Rstudiopartes.jpg
+#   slidy_presentation: default
+#   beamer_presentation: default
+# bibliography: biblio.bib
+# classoption: "aspectratio=169"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-library(knitr)
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", fig.retina = 3, rows.print = 7)
+library(sf)
+library(ggplot2)
+library(ggmap)
+library(prettymapr)
+library(units)
+library(tmap)
+library(leaflet)
+library(leafem)
+library(xaringanthemer)
+library(servr)
+library(RefManageR)
+library(ggmap)
+# rmarkdown::yaml_front_matter(knitr::current_input())
+
 
 knitr::knit_hooks$set(
    error = function(x, options) {
      paste('\n\n<div class="alert alert-danger" style="background-color:#ffb3b3">',
-           gsub('##', '\n', gsub('^##\ Error', '**Error**', x)),
+           gsub('##', '\n', gsub('^##\ Error', '<strong>Error</strong>', x)),
            '</div>', sep = '\n')
    },
    warning = function(x, options) {
@@ -33,486 +74,1139 @@ knitr::knit_hooks$set(
    }
 )
 
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-## Temas
-1. Manejo de archivos espaciales con `sf`
-    + Lectura de archivos de diferentes formatos
-        - Shapefile
-        - Base de datos de texto (*data frame*)
-    + Proyección y reproyección
-    + Manejo de objetos `sf`
-1. Visualización interactiva con `mapview`
-1. Visualización para publicación con `ggplot2`
+BibOptions(check.entries = FALSE, bib.style = "authoryear", style = "markdown",
+           dashed = TRUE, hyperlink = FALSE, max.names = 2)
+bib <- ReadBib("biblio.bib")
 
-Esta presentación y los datos utilizados está en https://github.com/PPaccioretti/VisualizacionDatosEspaciales
+duo_accent(primary_color = "#006747", secondary_color = "#1d5357", 
+           text_font_family = google_font(family = "Work Sans"),
+           text_font_size = "30px", code_highlight_color = "#a3c8ff")
+options(width = 80, scipen = 99)
 
-#Paquete `sf`
 
-----
 
-El paquete `sf` permite un análisis y manejo de archivos espaciales. 
-
-*Simple features* es una manera estandarizada de codificar en computadoras datos vectoriales (puntos, lineas, polígonos). El paquete `sf` implementa *simple features* en R y tiene la misma capacidad para datos vectoriales como los paquetes `sp`, `rgeos` y `rgdal` [@RJ]. 
-
-- Los objetos espaciales `sf` extienden al `data.frame` con una *geometry list-column* 
-- Siempre se puede deshacer un objeto `sf` y pasarlo a `data.frame`, el cual tendrá una columna-lista
-- Las funciones/métodos comienzan con `st_`
-- Los objetos espaciales `sf` son `data.frame`s
-
-#Lectura de archivos
-
----
-
-Carga e instalación de librerías para los procedimientos
-
-```{r, message=FALSE}
-libs <- c("sf","raster", "ggplot2","mapview","units")
-
+libs <- c("sf", "ggmap", "prettymapr", "tmap", "leaflet","leafem", "ggplot2","units")
 new.packages <- libs[!(libs %in% rownames(installed.packages()))]
 if(length(new.packages)) install.packages(new.packages)
 
 invisible(sapply(libs, library,character.only = T, quietly=T))
+
+# servr::daemon_stop(1)
+# xaringan::inf_mr()
+# install.packages("revealjs")
 ```
 
 
-## Lectura de archivo *shapefile*
+## Temas
 
-*Shapefiles* consisten en varios archivos con el mimso nombre base que residen en el mismo directorio. Una de ellas tiene la extensión .shp
+1. Introducción a R
+1. Manejo de datos espaciales con `sf`
+    + Lectura de archivos de diferentes formatos
+        - Shapefile
+        - Base de datos de texto (*data frame*)
+    + Manejo de objetos `sf`
+    + Proyección y reproyección
+1. Visualización para comunicación de resultados
+    + Paquete `ggplot2`
+    + Paquete `tmap`
+1. Visualización interactiva
+    + Paquete `leaflet`
 
-- .shp: es el archivo principal que almacena la geometría de la entidad
-- .shx: es el archivo de índice que almacena el índice de la geometría de la entidad
-- .dbf: es la tabla dBASE que almacena la información de atributos de las entidades
-- .prj: es el archivo que almacena información del sistema de coordenadas
-- .xml: metadatos de ArcGIS, es el archivo que almacena información sobre el shapefile
-- .sbn y .sbx: son los archivos que almacenan el índice espacial de las entidades
+---
+class: inverse, middle, center
 
-Los tres primeros son obligatorios.
+# `r icon::fa(name = "github")`
 
-<!-- .fbn y .fbx: son los archivos que almacenan el índice espacial de las entidades para los shapefiles que son solo de lectura. -->
-<!-- .ain y .aih: son los archivos que almacenan el índice de atributo de los campos activos en una tabla o una tabla de atributos del tema. -->
-<!-- .atx: se crea un archivo .atx para cada shapefile o índice de atributos de shapefile dBase creado en ArcCatalog. ArcGIS no utiliza los índices de atributo de ArcView GIS 3.x de los archivos shapefile y dBase. Se ha creado un nuevo modelo de indexación de atributos para los archivos shapefile y dBase. -->
-<!-- .ixs: índice de geocodificación para los shapefiles de lectura y escritura. -->
-<!-- .mxs: índice de geocodificación para los shapefiles de lectura y escritura (formato ODB). -->
-<!-- .cpg: es un archivo opcional que se puede utilizar para especificar la página de código para identificar el conjunto de caracteres que se va a utilizar. -->
+# .fancy[Esta presentación y los datos están disponibles en]
 
-----
 
+---
 
-```{r}
-Departamentos<-st_read("./Datos/deptos_cba_cg")
-```
 
+## Generalidades de `r icon::fa("r-project")`
 
-```{r}
-class(Departamentos)
-```
+- [R](https://cran.r-project.org/) `r Cite(bib, "R-base")` es un lenguaje de programación orientado a objetos.
 
-----
+- Creado por Ross Ihaka y Robert Gentleman en 1993 como un dialecto del software S.
 
-Dado el formato desde el cual se creó el objeto `Departamentos` tiene un sistema de coordenadas de referencia.
-```{r}
-st_crs(Departamentos)
+- Puede ser instalado en múltiples plataformas.
 
-```
+- [RStudio](https://www.rstudio.com/products/rstudio/download/#download) `r Cite(bib, "Rstudio")` es un entorno de desarrollo integrado (*Integrated Development Environment* IDE) que facilita la programación.
 
+- R permite realizar estadísticas geoespaciales, modelado y visualización con paquetes especializados.
 
-## Lectura de archivo de texto
-Al usar la función `read.table` la clase del objeto generado será `data.frame`.
-```{r}
-Suelos<-read.table("./Datos/suelos.txt", header=T)
-```
 
-Este `data.frame` no es un objeto espacial para R. Por lo que es necesario cambiarlo a clase `sf`, para poder trabajarlo como tal.
+---
 
-```{r}
-Suelossf<-st_as_sf(Suelos,coords = c("Xt","Yt"))
-```
 
-```{r}
-st_crs(Suelossf)
-```
+## Interfaz de RStudio
 
-----
 
-```{r}
-head(Suelossf)
-```
-
-
-----
-
-Es importante indicar cual es la proyección de la base de datos mediante el argumento `crs = `. Si no se le especifica no tomará ningún sistema de coordenadas de referencia.
-
-```{r}
-Suelossf<-st_as_sf(Suelos,coords = c("Xt","Yt"),  crs = 32720)
-```
-
-```{r}
-st_crs(Suelossf)
-
-```
-
-----
-
-```{r}
-head(Suelossf)
-```
-
-
-## Geometría de los objetos
-
-```{r}
-st_geometry(Departamentos)
-```
-
------
-
-```{r}
-st_geometry(Suelossf)
-```
-
-#Manejo de objetos espaciales
-
-## Proyecciones de los objetos
-
-Ya vimos la función `sf::st_crs()` para ver cual sistema de coordenadas de referencia tienen nuestros objetos 
-```{r}
-st_crs(Departamentos)
-st_crs(Suelossf)
-```
-
-## Reproyectar el sistema de coordenadas de referencia 
-```{r}
-st_crs(Departamentos)
-```
-
-Para reproyectar el objeto `Departamentos` podemos tomar la proyección del objeto `Suelossf` como referencia
-
-```{r}
-Departamentos<-st_transform(Departamentos,st_crs(Suelossf))
-```
-
-----
-
-```{r}
-st_crs(Departamentos)
-```
-
-
-
-## Distancia entre puntos
-
-```{r}
-st_distance(Suelossf)
-```
-
-----
-
-- Distancia media entre todos los puntos
-
-```{r}
-DistanciasSuelo<-st_distance(Suelossf)
-mean(DistanciasSuelo)
-```
-
-----
-
-- Distancia media entre puntos diferentes
-
-```{r, error=TRUE}
-DistMedia<-mean(DistanciasSuelo[DistanciasSuelo!=0])
-```
-
-
-```{r}
-(DistMedia<-mean(DistanciasSuelo[DistanciasSuelo!=units::as_units(0,"m")]))
-units(DistMedia) <- as_units("km")
-DistMedia
-```
-
-
-## Conteo de puntos dentro de polígonos
-
-```{r}
-st_covers(Departamentos,Suelossf)
-```
-
-----
-
-```{r}
-lengths(st_covers(Departamentos,Suelossf))
-```
-
-
-----
-
-```{r}
-head(DepartConMuestras<-data.frame("Muestras"=lengths(st_covers(Departamentos,Suelossf)),Departamentos))
-```
-----
-
-
-```{r}
-kable(table(rep(Departamentos$departa, lengths(st_covers(Departamentos,Suelossf)))))
-```
-
-
-## Media de una variable por departamento
-
-```{r}
-(MediasMOS<-sapply(st_covers(Departamentos,Suelossf), function(x, datos,columna){
-  mean(datos[x,columna,drop=T],na.rm=T)}, datos=Suelossf, columna="MOS"))
-```
-```{r}
-
-MediaMosCAT<-cut(MediasMOS,3)
-```
-
-----
-
-Creamos dos nuevas columnas (`MOSMedia`,`MOSMediaCAT`) en el objeto `Departamentos` con los valores numericos y categóricos de las medias de MOS.
-```{r}
-Departamentos$MOSMedia<- MediasMOS
-Departamentos$MOSMediaCAT<-MediaMosCAT
-```
-
-
-## Lectura de archivo Raster (.tif)
-
-Dado las características del archivos raster, no son escalables para ser tratados como *simple feature*. El paquete `raster` es específico para el manejo de este tipo de archivos.
-
-Lectura del archivo de formato .tif
-
-```{r}
-(DEM<-raster("./Datos/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif"))
-```
-
-----
-
-Notemos que `st_crs()` no funciona en objetos de clase `r class(DEM)`.
-
-```{r}
-st_crs(DEM)
-```
-
-por lo que hay que utilizar la función `raster::crs`. 
-
-```{r}
-raster::crs(DEM)
-```
-
-----
-
-```{r}
-DEMrp<-projectRaster(DEM, crs=st_crs(Departamentos)$proj4string)# crs(DEM)
-DepDEM<-extract(x=DEMrp, y=Departamentos, fun=mean, df=T,sp=T)
-
-class(DepDEM)
-```
-----
-
-```{r}
-DepDEMsf<-st_as_sf(DepDEM)
-names(DepDEMsf)
-```
-
-#Visualización de datos geoespaciales
-
-----
-
-Gráficos por defecto con el paquete `sf` 
-
-```{r}
-plot(Suelossf)
-```
-
-
-
-# Visualización interactiva con `mapview`
-
-----
-
-`mapview` (@mapview) es un paquete de R creado para ayudar al investigador durante su trabajo en el análisis de datos espaciales. Provee funciones para crear visualizaciones interactivas de datos espaciales de una manera muy rápida. Con `mapview` se puede visualizar los datos espaciales junto con sus atributos y geometrías.
-
-```{r, eval=FALSE}
-## S4 method for signature 'sf'
-mapView(x, map = NULL, pane = "auto",
-  canvas = useCanvas(x), viewer.suppress = canvas, zcol = NULL,
-  burst = FALSE, color = mapviewGetOption("vector.palette"),
-  col.regions = mapviewGetOption("vector.palette"), at = NULL,
-  na.color = mapviewGetOption("na.color"), cex = 6,
-  lwd = lineWidth(x), alpha = 0.9, alpha.regions = regionOpacity(x),
-  na.alpha = regionOpacity(x), map.types = NULL,
-  verbose = mapviewGetOption("verbose"), popup = popupTable(x),
-  layer.name = NULL, label = makeLabels(x, zcol),
-  legend = mapviewGetOption("legend"), legend.opacity = 1,
-  homebutton = TRUE, native.crs = FALSE,
-  highlight = mapviewHighlightOptions(x, alpha.regions, alpha, lwd),
-  maxpoints = getMaxFeatures(x), ...)
-```
-
-----
-
-Visualicemos una capa
-```{r}
-mapview(Departamentos)
-```
-
-----
-
-Colorear por valores numéricos
-```{r}
-mapview(Departamentos, zcol='st_area_sh')
+```{r, echo = FALSE, out.width = "80%"}
+knitr::include_graphics("images/Rstudiopartes.jpg")
 ```
 
 ---
 
-Colorear por valores numéricos
-```{r}
-mapview(Departamentos, zcol="MOSMedia")
-```
+## Sintaxis
 
++ Los `#` indican comentarios en el código, todo lo que está a la derecha de este símbolo no será ejecutado.
++ Si deseamos guardar un resultado de una función en un objeto, debemos utilizar la función de asignación `<-`.
++ Argumentos de una functión se especifican entre paréntesis y están separados por coma: `NombreFuncion(arg1, arg2)`.
++ R distingue mayúsculas y minúsculas.
++ Caracteres especiales (espacios, tildes, signos) son reemplazados por . en nombres de columnas.
++ Se recomienda evitar el uso de tildes, ñ, símbolos matemáticos para nombres de los niveles de factores, columnas y objetos.
 
-----
+---
 
-Colorear por valores categóricos
-```{r, echo = TRUE}
-mapview(Departamentos, zcol='MOSMediaCAT')
-```
-
-----
-
-Generar las categorías por los intervalos que especifiquemos
-```{r, echo = TRUE}
-mapview(Departamentos, zcol='MOSMedia',at=seq(min(Departamentos$MOSMedia),max(Departamentos$MOSMedia),length=5 ))
-```
-
-----
-
-Seleccionar las categorías que deseamos ver de manera interactiva
-```{r, echo = TRUE}
-mapview(Departamentos, zcol='MOSMediaCAT', burst=TRUE)
-```
-
-
-----
-
-Diferentes tipos de mapas base
-```{r, echo = TRUE}
-mapview(Departamentos, zcol='departa', map.types = c("OpenStreetMap","CartoDB.DarkMatter"))
-
-```
-
-
-----
-
-Mapa de Puntos espaciales
-```{r}
-mapview(Suelossf, legend=TRUE, cex="pH")
-```
-
-## Multiples capas en un solo mapa
-```{r}
-mapview(Departamentos) + Suelossf
-```
-
-
-## Cambio de las opciones generales de `mapview`
+## Ejemplo de código
 
 ```{r}
-mapviewOptions(basemaps = c("CartoDB.Positron","Esri.WorldShadedRelief", "OpenStreetMap.DE"),
-               layers.control.pos = "bottomright")
-mapview(Departamentos, color="blue") + mapview(Suelossf, color = "grey40",col.regions = "red")
+2+2
+normalAleatorio <- rnorm(10, mean = 0, sd = 1) 
+normalAleatorio
 ```
 
-# Visualización para publicación con `ggplot2`
+---
 
-----
 
-`ggplot2` (@ggplot) es un paquete que permite la creación de gráficos elegantes y complejos. Es muy popular en la comunidad de R, donde tomó gran importancia en los últimos años. 
+<!-- layout: false -->
+class: inverse, middle, center
+
+# Datos espaciales
+
+---
+
+# R-espacial
+- Hay numerosos paquetes para el manejo de datos espaciales `geoR`, `sp`, `gstat`, `rgdal`, `spdep`, `sf`, `stars`, `raster`, entre otros.
+- Los primeros procedimientos espaciales de R se originaron en el lenguaje S, en la década del 90 `r Cite(bib, "bivand_implementing_2000")`.
+- A partir del 2000, R ofrece paquetes que posibilitan el tratamiento de datos espaciales a través de diversos métodos. Algunos de ellos todavía se utilizan.
+- El paquete `sf` se basa en su predecesor `sp`.
+
+
+---
+
+# Datos espaciales en R
+
++ Los datos vectoriales, usando puntos, líneas y polígonos, permiten representar superficies `r icon::fa("globe-americas")` 
++ Los datos tipo *raster* divide la superficie en celdas (pixeles) de tamaño constante
+
+
+> En este curso utilizaremos:  
+> - Paquete `sf` para trabajar con archivos vectoriales 
+> - Paquete `raster` para trabajar con *rasters*
+
+
+![]("images/SateliteTrabajando.gif")
+
+---
+
+```{r, echo = FALSE, out.width = "10%"}
+knitr::include_graphics("images/Satelite.jpg")
+knitr::include_graphics("images/SateliteTrabajando.gif")
+
+
+```
+
+
+
+---
+
+# Paquete `sf`
+
+*Simple features* es una manera estandarizada de codificar, en computadoras, datos **vectoriales** (puntos, lineas y polígonos) `r icon::fa("draw-polygon")`
+
+El paquete `sf` implementa *simple features* en R y conserva las mismas capacidades para el manejo de datos vectoriales como los paquetes `sp`, `rgeos` y `rgdal` `r Cite(bib, "Pebesma_RJ")`
+
+---
+
+# Paquete `sf`
+
+
+- El paquete `sf` permite el análisis y el manejo de archivos con datos espaciales
+--
+
+- Los objetos espaciales `sf` están almacenados como `data.frame`, donde los datos geográficos ocupan una columna especial (*geometry list-column*)
+--
+
+- A partir de un objeto `sf` se puede obtener un `data.frame`, el cual tendrá una columna del tipo lista con la posición geográfica
+--
+
+- Las funciones del paquete comienzan con `st_`
+--
+
+- Los objetos espaciales `sf` pueden ser tratados como `data.frame` en la mayoría de las operaciones
+
+
+???
+- Tipos de objetos espaciales (Vectorial, Raster)
+- Lectura de diferentes tipos de archivos
+- Asignación del sistema de coordenadas
+    + Transformacion de cordenadas
+- Separar las coordenadas de los datos
+- Recortar capas en función de otra
+- Herramientas para el manejo de objetos
+    + Media, mediana de valores de punto dentro de poligono
+    + Conteo de puntos dentro de un poligono
+    + Union puntos, union diferentes capas 
+ 
+
+
+---
+
+# Paquete `raster`
+- Es compatible con objetos de tipo *raster* en R
+- Provee numerosas funciones para crear, leer, exportar, manipular y procesar datos de tipo *raster*
+- Permite trabajar con *raster* de dimensiones muy grandes para ser almacenados en la memoria RAM
+- Cada celda del archivo *raster*, puede contener un único valor (numérico o categórico)
+- Se pueden agrupar más de una capa en un mismo *raster*
+
+
+???
+En vez de cargar todo el *raster* en la memoria RAM, tiene la posibilidad de dividirlo en fragmentos más pequeños y procesarlos de manera iterativa.
+
+---
+
+# Sistemas de referencia de coordenadas
+
+- Define cómo los elementos espaciales de los datos se relacionan con la superficie terrestre
+- Pueden ser
+    + Sistemas de coordenadas geográficas: Identifica cualquier punto de la superficie terrestre utilizando dos valores: Latitud y Longitud (*lat long*)
+--
+    + Proyecciones de sistemas de coordenadas de referencia: Basados en coordenadas Cartesianas en una superficie plana (*UTM*)
+
+
+---
+layout: false
+class: inverse, middle, center
+
+# Manos a la obra
+
+## `r icon::fa("laptop-code")`
+
+---
+
+# Lectura de archivos
+
+  + Vectoriales
+      - shp (departamentos y cuencas de la Provincia de Córdoba)
+      - desde archivo de texto (Muestreo de Suelo de la Provincia)
+  + Raster
+      - tif (DEM)
+  
+  .center[`r icon::fa("globe", size = 2.3)` ]
+
+---
+# Vectoriales
+
+```{r, highlight.output=c(1,2,6,9)}
+head(departamentos <- read_sf("datos/deptos_cba", stringsAsFactors = TRUE), 3)
+```
+
+
+---
 
 ```{r}
-ggplot(Suelossf) + geom_sf()
+summary(departamentos)
 ```
 
-----
-```{r}
-ggplot(Departamentos) + geom_sf(aes(fill=st_area_sh))
-```
+---
 
-
-----
-```{r}
-ggplot(Departamentos) +
-   geom_sf(aes(fill = st_area_sh)) +
-   geom_sf_label(aes(label = cabecer))
-
-```
-
-
-----
-```{r}
-ggplot(Departamentos) +
-   geom_sf(aes(fill = st_area_sh)) +
-   geom_sf_label(aes(label = cabecer), size=2.5)
-
-```
-
-----
+<!-- # Visualicemos la capa -->
 
 ```{r}
-
-Departamentos$Cent <- st_centroid(Departamentos$geometry)
-ggplot(Departamentos) +
-  geom_sf(colour = "blue") +
-  geom_sf(aes(geometry = Cent, size = st_area_sh), show.legend = "point")
-
+plot(departamentos)
 ```
 
-----
+
+???
+
+Visualizamos las capas con la función `plot`
+
+---
+
+
+.left-column[.center-left[<br>
+```{r, eval=FALSE}
+?plot.sf()
+```
+]]
+
+.right-column[.center-right[
+```{r}
+plot(departamentos["departa"])
+```
+]]
+
+
+???
+
+Si queremos sacar la leyenda?
+
+---
 
 ```{r}
-ggplot(Departamentos) +
-  geom_sf(data= Departamentos,colour = "blue") +
-  geom_sf(data= Departamentos,aes(geometry = Cent, size = st_area_sh), show.legend = "point") +
-  geom_sf(data=Suelossf)
+plot(departamentos["departa"], key.pos = NULL)
 ```
 
+??? 
 
-----
+Podemos cambiar el titulo
+
+---
 
 ```{r}
-ggplot(Departamentos) +
-  geom_sf(data= Departamentos,colour = "blue") +
-  geom_sf(data= Departamentos,aes(geometry = Cent, size = st_area_sh), show.legend = "point") +
-  geom_sf(data=Suelossf, colour='#E67E22')
+plot(departamentos["departa"], key.pos = NULL, main = "Departamentos")
 ```
 
-----
+---
+
+## Ahora visualicemos `cuencas`
 
 ```{r}
-ggplot() + 
-  geom_sf(data=Departamentos, color = "gray30", lwd=2, fill=NA) +
-  geom_sf(data=Suelossf, fill = NA, show.legend = F, color="gray50", lwd=0.4) +
-  geom_sf_label(data=Suelossf,aes(label = ID_2), size=1) +
-  labs(title="Muestras de Suelo", y="Latitud", x="Longitud") +
-  theme_bw()
+head(cuencas <- read_sf("datos/cuencas_cba", stringsAsFactors = TRUE), 2)
+
 ```
 
 
-## Visualización de objeto de clase `RasterLayer`
+---
+
 ```{r}
-spplot(DEM)
+summary(cuencas)
 ```
 
-----
+---
 
-```{r, warning=FALSE}
-mapview(DEM, col.regions=viridisLite::viridis)
+
+```{r, fig.height=5.5}
+plot(cuencas)
+```
+
+
+---
+
+
+.pull-left[
+
+```{r}
+plot(departamentos["departa"], 
+     main = NULL, col = "transparent")
+```
+
+]
+
+.pull-right[
+
+```{r}
+plot(cuencas["AREA"], 
+     main = NULL, col = "transparent")
+```
+
+]
+
+
+
+---
+
+## Si queremos ver superpuestas ambas capas?
+
+
+```{r, fig.height=5.5}
+plot(departamentos["departa"], col = "transparent", main = NULL, 
+     reset = FALSE) #<<
+plot(cuencas["AREA"], col = "transparent", add = TRUE)
+
+```
+
+---
+
+```{r, highlight.output=c(3)}
+st_crs(departamentos)
+```
+
+```{r, highlight.output=c(3)}
+st_crs(cuencas)
+```
+
+```{r}
+st_crs(departamentos) == st_crs(cuencas)
+
+```
+
+---
+
+```{r, highlight.output=c(3)}
+cuencas <- st_transform(cuencas, st_crs(departamentos))
+st_crs(cuencas)
+```
+
+```{r}
+st_crs(departamentos) == st_crs(cuencas)
+```
+
+---
+
+```{r, highlight.output=c(5, 6)}
+head(cuencas,4)
+```
+
+---
+
+
+```{r}
+plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
+plot(cuencas["AREA"], col = "transparent", add = TRUE)
+
+```
+
+
+---
+
+```{r}
+plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
+plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+```
+
+---
+
+```{r, fig.height = 5.3}
+plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
+plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
+```
+
+---
+
+```{r, fig.height=5.2}
+plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
+plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
+prettymapr::addnortharrow()
+
+```
+
+---
+
+```{r plot-departamentos, results='hide', fig.show = 'hide'}
+plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
+plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
+prettymapr::addnortharrow()
+prettymapr::addscalebar()
+```
+
+---
+
+```{r ref.label = 'plot-departamentos', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+---
+
+
+```{r plot-prettyCm, results='hide', fig.show = 'hide'}
+prettymap(plot(departamentos["departa"],
+               col = "transparent", 
+               main = "Departamentos"), 
+          drawarrow=TRUE)
+
+```
+
+---
+
+.left-column[ 
+La escala está en centímetros!
+
+.center[`r icon::fa("frown")`]
+
+]
+
+.right-column[ 
+
+```{r ref.label = 'plot-prettyCm', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+---
+
+
+```{r plot-prettyKm, results='hide', fig.show = 'hide'}
+prettymap(plot(departamentos["departa"],
+               col = "transparent", 
+               main = "Departamentos"), 
+          drawarrow=TRUE, 
+          scale.plotepsg = 4326) #<<
+
+```
+
+---
+
+.left-column[ 
+
+.center[`r icon::fa("laugh-beam")`]
+
+]
+
+.right-column[ 
+```{r ref.label = 'plot-prettyKm', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+---
+
+# Mapa de fondo
+
+```{r, seteoBordes, eval = TRUE}
+bordes <- st_bbox(cuencas)
+names(bordes) <- c("left", "bottom", "right", "top")
+```
+
+
+```{r, plot-descargaGraficaMapa, eval = TRUE, warning=TRUE, fig.show = 'hide', error = TRUE, message=FALSE, cahe = TRUE}
+Mapa <- get_stamenmap(bbox = bordes, zoom = 2)
+
+```
+
+
+```{r, eval = FALSE}
+try(plot(cuencas["AREA"], axes = TRUE, bgMap= Mapa))
+```
+
+
+---
+
+```{r plot-mapaDeFondo, eval = TRUE, fig.show = 'hide'}
+cuencas <- st_transform(cuencas, crs = st_crs(3857))
+plot(cuencas["AREA"], axes = TRUE, bgMap= Mapa)
+```
+
+---
+
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+cuencas <- st_transform(cuencas, crs = st_crs(3857))
+plot(cuencas["AREA"], axes = TRUE, bgMap= Mapa)
+addnortharrow()
+addscalebar()
 ```
 
 
 
-## Referencias
+
+---
+# Lectura de archivo de texto
+
+```{r}
+head(muestreo <- read.table("datos/MuestreoSuelo.txt", header = T, sep = "\t"),8)
+```
+
+---
+
+```{r}
+head(muestreo <- st_as_sf(muestreo, coords = c("Xt", "Yt"), crs = 32720), 5)
+
+```
+
+---
+
+
+```{r}
+
+muestreoLatLong <- st_transform(muestreo, st_crs(departamentos))
+plot(departamentos["departa"], col = "transparent", reset = FALSE)
+plot(muestreoLatLong["Limo"], add = TRUE)
+
+
+```
+
+
+---
+
+
+```{r}
+summary(muestreo)
+```
+
+---
+
+
+```{r, fig.height = 8.5, fig.width = 13}
+plot(muestreo, pch = 18 , cex = 3)
+```
+
+---
+# Librería `ggplot2`
+
+Idividualmente se especifican partes del gráfico. Luego estas partes se combinan para obtener el gráfico completo. Estas partes son:
+
+- Datos
+- Mapeo estético (*aesthetic mapping*)
+- Objetos geométricos (*geometric object*)
+--
+
+- Transformaciones estadísticas (*statistical transformations*)
+- Escalas (*scales*)
+- Sistema de coordenadas (*coordinate system*)
+- Ajustes de posición (*position adjustments*)
+- Particiones (*faceting*)
+
+---
+
+
+.pull-left[ 
+
+
+```{r ggplot-cuencas, fig.show = 'hide'}
+ggplot(cuencas) +
+  geom_sf() 
+```
+
+]
+
+.pull-right[ 
+```{r ref.label = 'ggplot-cuencas', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+
+---
+
+
+.pull-left[ 
+
+
+```{r ggplot-cuencasMuestreo, fig.show = 'hide'}
+
+ggCuencasMuestero <- ggplot() +
+  geom_sf(data = cuencas) +
+  geom_sf(data = muestreo, 
+          aes( color = Limo), size = 3)
+
+
+```
+
+]
+
+.pull-right[ 
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+ggCuencasMuestero
+```
+
+]
+
+---
+
+
+.pull-left[ 
+
+
+```{r ggplot-cuencasMuestNA, fig.show = 'hide'}
+
+ggCuencasMuestero + #<<
+  scale_color_continuous(na.value = "red")
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'ggplot-cuencasMuestNA', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+---
+
+# Cuantos puntosde muestreo hay en cada cuenca??? `r icon::fa("pencil-ruler")`
+
+
+```{r, error=TRUE}
+st_covers(cuencas, muestreoLatLong)
+```
+
+
+```{r, results='markup'}
+cuencasUTM <- st_transform(cuencas, st_crs(muestreo))
+lengths(st_covers(cuencasUTM, muestreo))
+
+```
+
+
+---
+
+
+```{r}
+st_area(cuencas)
+lengths(st_covers(cuencasUTM, muestreo))/st_area(cuencasUTM)
+
+```
+
+---
+
+
+```{r}
+puntosKm <- lengths(st_covers(cuencasUTM, muestreo))/units::set_units(st_area(cuencasUTM), km^2)
+cuencasUTM$CantidadMuestrasKm <- puntosKm
+cuencasUTM$CantidadMuestrasKm
+```
+
+---
+
+
+```{r}
+plot(cuencasUTM["CantidadMuestrasKm"])
+
+```
+
+
+---
+
+
+```{r}
+
+
+st_covers(cuencasUTM,muestreo)
+
+```
+
+
+---
+
+
+```{r, highlight.output=c(1,2,3)}
+ mediaCC <- sapply(st_covers(cuencasUTM,muestreo), function(x) {
+  mean(muestreo[x,][["CC"]], na.rm = TRUE)
+     })
+mediaCC
+
+
+```
+
+ 
+
+
+---
+
+
+
+.pull-left[ 
+
+
+```{r ggplot-cuencasMediaCC, fig.show = 'hide'}
+cuencasUTM$MediaCC <- mediaCC
+ggplot(cuencasUTM) +
+  geom_sf(aes(fill = MediaCC))
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'ggplot-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+---
+
+
+.pull-left[ 
+
+
+```{r ggplot-cuencasMediaCClab, fig.show = 'hide'}
+ggplot(cuencasUTM) +
+  geom_sf(aes(fill = MediaCC)) +
+  labs(fill = "Media C.C.")
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'ggplot-cuencasMediaCClab', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+---
+
+
+```{r}
+tm_shape(cuencasUTM) +
+  tm_fill()
+
+```
+
+---
+
+# Paquete `tmap`
+
+- La sintaxis es similar a `ggplot2`, pero orientada a mapas
+- La mayoría de las funciones comienzan con `tmap_`
+- Para comenzar a graficar, es necesario especificarlo con `tm_shape`
+- Las capas se agregan mediante `+`
+- Permite graficar mapas estáticos o interactivos con el mismo código `tmap_mode()`.
+
+---
+
+
+.pull-left[ 
+
+
+```{r tmap-cuencasMediaCC, fig.show = 'hide'}
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC") +
+  tm_borders()
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'tmap-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+
+---
+
+
+.pull-left[ 
+
+
+```{r tmap-cuencasMediaCCquant, fig.show = 'hide', results = 'hide'}
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", style = "quantile") +
+  tm_borders() +
+  tm_basemap() 
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'tmap-cuencasMediaCCquant', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+---
+
+
+.pull-left[ 
+
+
+```{r tmap-cuencasMediaCCquantInterac, fig.show = 'hide', results = 'hide'}
+tmap_mode("view")
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", style = "quantile") +
+  tm_borders() +
+  tm_basemap() 
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'tmap-cuencasMediaCCquantInterac', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+---
+
+
+.pull-left[ 
+
+
+```{r tmap-cuencasMediaCCquantInteracFondo, fig.show = 'hide', results = 'hide'}
+tmap_mode("view")
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", style = "quantile") +
+  tm_borders() +
+  tm_basemap() +
+  tm_view(alpha = 1, basemaps = "Esri.WorldTopoMap") #<<
+
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'tmap-cuencasMediaCCquantInteracFondo', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+---
+
+
+.pull-left[ 
+
+
+```{r tmap-cuencasMediaCCicono, fig.show = 'hide', results = 'hide'}
+tmap_mode("plot")
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC") +
+  tm_borders() +
+  tm_basemap() +
+  tm_symbols(size = "AREA", 
+             shape = tmap_icons("https://png.pngtree.com/svg/20160627/area_1270351.png"))
+
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'tmap-cuencasMediaCCicono', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+---
+
+
+.pull-left[ 
+
+
+```{r tmap-cuencasSeparadorTexto, fig.show = 'hide', results = 'hide'}
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", palette="RdYlGn") +
+  tm_borders() +
+  tm_basemap() +
+  tm_symbols(size = "AREA") +
+  tm_scale_bar() +
+  tm_layout(legend.format = list(text.separator= " a ", text.align = "center"))
+
+
+```
+
+]
+
+.pull-right[ 
+
+```{r ref.label = 'tmap-cuencasSeparadorTexto', echo = FALSE, warning=FALSE, message=FALSE}
+```
+
+]
+
+
+
+---
+
+
+```{r}
+
+
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC") +
+  tm_borders() +
+  tm_basemap() +
+  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
+  tm_scale_bar() +
+  tm_compass(position = c( "right", "top"))
+
+
+
+
+```
+
+---
+
+
+```{r}
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC") +
+  tm_borders() +
+  tm_basemap() +
+  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
+  tm_scale_bar() +
+  tm_compass(position = c( "right", "top")) +
+  tm_legend(
+    text.size=1,
+    title.size=1.2,
+    legend.outside=TRUE,
+    frame="gray50",
+    height=.6)
+
+```
+
+---
+
+
+```{r}
+
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC") +
+  tm_borders() +
+  tm_basemap() +
+  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
+  tm_scale_bar() +
+  tm_compass(position = c( "right", "top")) +
+  tm_facets("SISTEMA",nrow = 1)
+```
+
+---
+
+
+```{r}
+
+
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC", style = "quantile") +
+  tm_borders() +
+  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
+  tm_facets("SISTEMA")  +
+  tm_scale_bar() +
+  tm_compass(position = c( "right", "top"))
+
+```
+
+---
+
+
+```{r}
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC", style = "quantile") +
+  tm_borders() +
+  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
+  tm_facets("SISTEMA")  +
+  tm_scale_bar() +
+  tm_compass(position = c( "right", "top")) +
+  tm_layout(legend.format = list(text.separator= " a ", text.align = "left"))
+
+```
+
+---
+
+
+```{r}
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC", style = "cont",
+          textNA="Sin Muestras") +
+  tm_borders() +
+  tm_facets("SISTEMA")  +
+  tm_scale_bar(text.size = 10) +
+  tm_compass(type = "rose", position = c( "right", "top"), size = 2)
+
+```
+
+---
+
+
+
+.pull-left[ 
+
+
+```{r}
+tmap_cuencas <- tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", style = "quantile") +
+  tm_borders() +
+  tm_basemap() +
+  tm_view(alpha = 1, basemaps = "Esri.WorldTopoMap")
+
+
+
+```
+
+]
+
+.pull-right[ 
+
+```{r}
+tmap_muestreo <-   tm_shape(muestreo) +
+  tm_bubbles(col = "K", style = "cont", textNA = "Sin dato") +
+  tm_basemap()
+
+```
+
+]
+
+
+---
+
+
+```{r}
+tmap_arrange(tmap_cuencas, tmap_muestreo)
+
+```
+
+---
+
+
+```{r}
+
+tm_shape(cuencasUTM) +
+  tm_fill("MediaCC", style = "quantile") +
+  tm_borders() +
+  tm_basemap() +
+tm_shape(muestreo) +
+  tm_bubbles(col = "K", style = "cont") +
+  tm_basemap()
+
+
+```
+
+
+---
+
+
+```{r}
+
+leaflet() %>%
+  addTiles() %>%
+  addCircles(data = muestreoLatLong) %>%
+  addMiniMap(position = "topleft" , width = 150, height = 150)
+
+
+```
+
+
+
+---
+
+
+```{r}
+leaflet() %>%
+  addTiles() %>%
+  addCircles(data = muestreoLatLong) %>%
+  addMiniMap(position = "topleft" , width = 150, height = 150) %>%
+  addLogo("https://media.giphy.com/media/l1LcbeAkRm2UrdNio/giphy.gif",
+          position = "bottomleft",offset.x = 5, offset.y = 100, width = 480, height = 270) 
+```
+
+
+
+
+---
+
+
+# Referencias
+.small[
+```{r, results='asis', echo = FALSE}
+PrintBibliography(bib)
+```
+]
