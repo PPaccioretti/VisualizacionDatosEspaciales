@@ -138,7 +138,7 @@ class: inverse, middle, center
 
 # .fancy[Esta presentación y los datos están disponibles en]
 
-# .fancy[[https://github.com/PPaccioretti/VisualizacionDatosEspaciales]([https://github.com/PPaccioretti/VisualizacionDatosEspaciales)]
+[https://github.com/PPaccioretti/VisualizacionDatosEspaciales]([https://github.com/PPaccioretti/VisualizacionDatosEspaciales)
 
 
 ---
