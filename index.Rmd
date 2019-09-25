@@ -4,12 +4,11 @@ subtitle: "Visualización de datos geoespaciales en R"
 author: |
   Pablo Paccioretti<br>
   Cecilia Bruno<br>
-  <span style = 'font-size: 70%;'>
   Facultad de Ciencias Agropecuaras - UNC - CONICET</span>
-#date: |
-#  Esto es un Ejemplo<br><br>
-#  `r icon::fa("link")` [bit.ly/jlt-rmed2018](https://bit.ly/jlt-rmed2018)
-#  <br>`r icon::fa("twitter")` [jent103](https://twitter.com/jent103)
+  <span style = 'font-size: 70%;'>
+date: |
+  `r icon::fa("at")` pablopaccioretti@agro.unc.edu.ar
+  <br>`r icon::fa("at")` cebruno@agro.unc.edu.ar
 output:
   xaringan::moon_reader:
     css: [xaringan-themer.css, myfonts.css]
@@ -21,9 +20,8 @@ output:
       ratio: '16:9'
       slideNumberFormat: |
         <div class="progress-bar-container">
-          <div class="progress-bar" style="width: calc(%current% / %total% * 100%);">
           </div>
-        </div>
+          <div class="progress-bar" style="width: calc(%current% / %total% * 100%);">
       titleSlideClass: ["left", "middle", "inverse"]
       # chakra: libs/remark-latest.min.js
       # df_print: paged
@@ -44,7 +42,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, purl = FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.align = "center", fig.retina = 3, rows.print = 7)
 library(sf)
 library(ggplot2)
@@ -57,7 +55,6 @@ library(leafem)
 library(xaringanthemer)
 library(servr)
 library(RefManageR)
-library(ggmap)
 # rmarkdown::yaml_front_matter(knitr::current_input())
 
 
@@ -98,6 +95,27 @@ invisible(sapply(libs, library,character.only = T, quietly=T))
 ```
 
 
+```{r cargaLibrerias}
+
+library(sf)
+library(ggplot2)
+library(ggmap)
+library(prettymapr)
+library(units)
+library(tmap)
+library(leaflet)
+library(leafem)
+
+
+libs <- c("sf", "ggmap", "prettymapr", "tmap", "leaflet","leafem", "ggplot2","units")
+new.packages <- libs[!(libs %in% rownames(installed.packages()))]
+if(length(new.packages)) install.packages(new.packages)
+
+invisible(sapply(libs, library,character.only = T, quietly=T))
+
+```
+
+
 ## Temas
 
 1. Introducción a R
@@ -119,6 +137,8 @@ class: inverse, middle, center
 # `r icon::fa(name = "github")`
 
 # .fancy[Esta presentación y los datos están disponibles en]
+
+# .fancy[[https://github.com/PPaccioretti/VisualizacionDatosEspaciales]([https://github.com/PPaccioretti/VisualizacionDatosEspaciales)]
 
 
 ---
@@ -143,7 +163,7 @@ class: inverse, middle, center
 ## Interfaz de RStudio
 
 
-```{r, echo = FALSE, out.width = "80%"}
+```{r, echo = FALSE, out.width = "80%", purl = FALSE }
 knitr::include_graphics("images/Rstudiopartes.jpg")
 ```
 
@@ -193,20 +213,14 @@ class: inverse, middle, center
 + Los datos tipo *raster* divide la superficie en celdas (pixeles) de tamaño constante
 
 
-> En este curso utilizaremos:  
-> - Paquete `sf` para trabajar con archivos vectoriales 
-> - Paquete `raster` para trabajar con *rasters*
+<!-- > En este curso utilizaremos:   -->
+<!-- > - Paquete `sf` para trabajar con archivos vectoriales  -->
+<!-- > - Paquete `raster` para trabajar con *rasters* -->
 
 
-![]("images/SateliteTrabajando.gif")
 
----
-
-```{r, echo = FALSE, out.width = "10%"}
-knitr::include_graphics("images/Satelite.jpg")
+```{r, echo = FALSE, out.width = "10%", purl = FALSE}
 knitr::include_graphics("images/SateliteTrabajando.gif")
-
-
 ```
 
 
@@ -292,9 +306,7 @@ class: inverse, middle, center
   + Vectoriales
       - shp (departamentos y cuencas de la Provincia de Córdoba)
       - desde archivo de texto (Muestreo de Suelo de la Provincia)
-  + Raster
-      - tif (DEM)
-  
+
   .center[`r icon::fa("globe", size = 2.3)` ]
 
 ---
@@ -550,7 +562,7 @@ prettymap(plot(departamentos["departa"],
 ]
 
 .right-column[ 
-```{r ref.label = 'plot-prettyKm', echo = FALSE, warning=FALSE, message=FALSE}
+```{r ref.label = 'plot-prettyKm', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
 ]
@@ -667,7 +679,7 @@ ggplot(cuencas) +
 ]
 
 .pull-right[ 
-```{r ref.label = 'ggplot-cuencas', echo = FALSE, warning=FALSE, message=FALSE}
+```{r ref.label = 'ggplot-cuencas', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
 ]
@@ -717,7 +729,7 @@ ggCuencasMuestero + #<<
 
 .pull-right[ 
 
-```{r ref.label = 'ggplot-cuencasMuestNA', echo = FALSE, warning=FALSE, message=FALSE}
+```{r ref.label = 'ggplot-cuencasMuestNA', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
 ]
@@ -810,7 +822,7 @@ ggplot(cuencasUTM) +
 
 .pull-right[ 
 
-```{r ref.label = 'ggplot-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE}
+```{r ref.label = 'ggplot-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
 ]
@@ -833,7 +845,7 @@ ggplot(cuencasUTM) +
 
 .pull-right[ 
 
-```{r ref.label = 'ggplot-cuencasMediaCClab', echo = FALSE, warning=FALSE, message=FALSE}
+```{r ref.label = 'ggplot-cuencasMediaCClab', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
 ]
@@ -875,7 +887,7 @@ tm_shape(cuencasUTM) +
 
 .pull-right[ 
 
-```{r ref.label = 'tmap-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE}
+```{r ref.label = 'tmap-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
 ]
@@ -1008,7 +1020,7 @@ tm_shape(cuencasUTM) +
 
 .pull-right[ 
 
-```{r ref.label = 'tmap-cuencasSeparadorTexto', echo = FALSE, warning=FALSE, message=FALSE}
+```{r ref.label = 'tmap-cuencasSeparadorTexto', echo = FALSE, warning=FALSE, message=FALSE, purl=FALSE}
 ```
 
 ]
@@ -1127,7 +1139,7 @@ tmap_cuencas <- tm_shape(cuencasUTM) +
   tm_borders() +
   tm_basemap() +
   tm_view(alpha = 1, basemaps = "Esri.WorldTopoMap")
-
+tmap_cuencas
 
 
 ```
@@ -1140,6 +1152,7 @@ tmap_cuencas <- tm_shape(cuencasUTM) +
 tmap_muestreo <-   tm_shape(muestreo) +
   tm_bubbles(col = "K", style = "cont", textNA = "Sin dato") +
   tm_basemap()
+tmap_muestreo
 
 ```
 
@@ -1157,8 +1170,11 @@ tmap_arrange(tmap_cuencas, tmap_muestreo)
 ---
 
 
-```{r}
 
+.pull-left[ 
+
+
+```{r tmap-cuencasMuestreo, fig.show = 'hide', results = 'hide'}
 tm_shape(cuencasUTM) +
   tm_fill("MediaCC", style = "quantile") +
   tm_borders() +
@@ -1169,6 +1185,16 @@ tm_shape(muestreo) +
 
 
 ```
+
+]
+
+.pull-right[ 
+
+
+```{r ref.label = 'tmap-cuencasMuestreo', echo = FALSE, warning=FALSE, message=FALSE, purl=FALSE}
+```
+
+]
 
 
 ---
