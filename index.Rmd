@@ -486,21 +486,25 @@ plot(cuencas["AREA"],
 
 ## Si queremos ver superpuestas ambas capas?
 
-
-```{r, fig.height=5.5}
+```{r plot-plotSinEstarJuntos, fig.height=5.5, results='hide', fig.show = 'hide'}
 plot(departamentos["departa"], col = "transparent", main = NULL,
      reset = FALSE) #<<
 plot(cuencas["AREA"], col = "transparent", 
      add = TRUE) #<<
-
 ```
 
+.pull-left[
+```{r ref.label = 'plot-plotSinEstarJuntos', fig.height=5, echo = FALSE, warning=FALSE, message=FALSE}
+```
+]
 
 --
 
+.pull-right[
 ```{r, echo = FALSE, out.width = "34%", purl = FALSE }
 knitr::include_graphics("images/Deception.gif")
 ```
+]
 
 ---
 
@@ -548,14 +552,14 @@ plot(cuencas["AREA"], col = "transparent", add = TRUE)
 
 ```{r}
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 ```
 
 ---
 
 ```{r, fig.height = 5.3}
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
 ```
 
@@ -563,7 +567,7 @@ legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c
 
 ```{r, fig.height=5.2}
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
 prettymapr::addnortharrow()
 
@@ -573,7 +577,7 @@ prettymapr::addnortharrow()
 
 ```{r plot-departamentos, results='hide', fig.show = 'hide'}
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
 prettymapr::addnortharrow()
 prettymapr::addscalebar()
