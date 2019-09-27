@@ -1,0 +1,101 @@
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+img {
+    max-width: 100%;
+}
+
+.remark-slide-content {
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+
+.remark-slide-number {
+  position: inherit;
+}
+
+.remark-slide-number .progress-bar-container {
+  position: absolute;
+  bottom: 0;
+  height: 4px;
+  display: block;
+  left: 0;
+  right: 0;
+}
+
+.remark-slide-number .progress-bar {
+  height: 100%;
+  background-color: #00edff;
+}
+
+
+
+.center-left {
+  position:          relative;
+  top:               2%;
+  transform:         translateY(2%);
+}
+.center-right {
+  position:          relative;
+  top:               2%;
+  transform:         translateY(2%);
+}
+
+.small { font-size: 80%;
+         line-height:1; 
+  
+}
+
+
+.pull-left {
+    float: left;
+    width: 47%;
+}
+
+.pull-right {
+    float: right;
+    width: 47%;
+}
+
+.left-column {
+    width: 20%;
+    height: 92%;
+    float: left;
+}
+
+.right-column {
+    width: 75%;
+    float: right;
+    padding-top: 1em;
+}
+
+
+
+.footnote {
+  position: absolute;
+  bottom: 3em;
+  padding-right: 4em;
+  font-size: 90%;
+}
+
+<style>
+pre {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1em 0px;
+    margin-top: 0em;
+    margin-right: 0px;
+    margin-bottom: 0em;
+    margin-left: 0px;
+}
+</style>
+
+
+
+  

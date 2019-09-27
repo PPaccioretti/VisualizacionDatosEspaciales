@@ -3,15 +3,15 @@ title: "II Congreso - Escuela en Estadística espacial"
 subtitle: "Visualización de datos geoespaciales en R"
 author: |
   Pablo Paccioretti<br>
-  Cecilia Bruno<br>
-  Facultad de Ciencias Agropecuaras - UNC - CONICET</span>
-  <span style = 'font-size: 70%;'>
+  Cecilia Bruno<br><br>
+  <span style = 'font-size: 90%;'>Facultad de Ciencias Agropecuaras - UNC - CONICET</span>
+  
 date: |
-  `r icon::fa("at")` pablopaccioretti@agro.unc.edu.ar
-  <br>`r icon::fa("at")` cebruno@agro.unc.edu.ar
+  `r icon::fa("at", color = "#2e1c27")` pablopaccioretti@agro.unc.edu.ar
+  <br>`r icon::fa("at", color = "#2e1c27")` cebruno@agro.unc.edu.ar
 output:
   xaringan::moon_reader:
-    css: [xaringan-themer.css, myfonts.css]
+    css: [css/xaringan-themer.css, css/myfonts.css]
     seal: true
     nature:
       countIncrementalSlides: false
@@ -52,6 +52,7 @@ library(units)
 library(tmap)
 library(leaflet)
 library(leafem)
+
 library(xaringanthemer)
 library(servr)
 library(RefManageR)
@@ -78,16 +79,11 @@ bib <- ReadBib("biblio.bib")
 
 duo_accent(primary_color = "#006747", secondary_color = "#1d5357", 
            text_font_family = google_font(family = "Work Sans"),
-           text_font_size = "30px", code_highlight_color = "#a3c8ff")
+           text_font_size = "30px", code_highlight_color = "#a3c8ff", 
+           link_color = "#ff1fad",
+           outfile = "css/xaringan-themer.css")
 options(width = 80, scipen = 99)
 
-
-
-libs <- c("sf", "ggmap", "prettymapr", "tmap", "leaflet","leafem", "ggplot2","units")
-new.packages <- libs[!(libs %in% rownames(installed.packages()))]
-if(length(new.packages)) install.packages(new.packages)
-
-invisible(sapply(libs, library,character.only = T, quietly=T))
 
 # servr::daemon_stop(1)
 # xaringan::inf_mr()
@@ -95,17 +91,19 @@ invisible(sapply(libs, library,character.only = T, quietly=T))
 ```
 
 
-```{r cargaLibrerias}
+```{r cargaLibrerias, echo=FALSE, eval=FALSE}
+# Esto es un comentario
+# Esta es otra linea de comentario
+# ahora vamos a sumar algo
+2 + 2
 
-library(sf)
-library(ggplot2)
-library(ggmap)
-library(prettymapr)
-library(units)
-library(tmap)
-library(leaflet)
-library(leafem)
+#Y podemos almacenar un resultado en un objeto
+resultado <- 2 + 2
+# para verlo tenemos que "llamar" a ese objeto
+resultado
 
+
+#Comencemos instalando los paquetes especializados para datos espaciales
 
 libs <- c("sf", "ggmap", "prettymapr", "tmap", "leaflet","leafem", "ggplot2","units")
 new.packages <- libs[!(libs %in% rownames(installed.packages()))]
@@ -138,27 +136,49 @@ class: inverse, middle, center
 
 # .fancy[Esta presentación y los datos están disponibles en]
 
-[https://github.com/PPaccioretti/VisualizacionDatosEspaciales]([https://github.com/PPaccioretti/VisualizacionDatosEspaciales)
+[https://github.com/PPaccioretti/VisualizacionDatosEspaciales](https://github.com/PPaccioretti/VisualizacionDatosEspaciales)
 
-
----
-
-
-## Generalidades de `r icon::fa("r-project")`
-
-- [R](https://cran.r-project.org/) `r Cite(bib, "R-base")` es un lenguaje de programación orientado a objetos.
-
-- Creado por Ross Ihaka y Robert Gentleman en 1993 como un dialecto del software S.
-
-- Puede ser instalado en múltiples plataformas.
-
-- [RStudio](https://www.rstudio.com/products/rstudio/download/#download) `r Cite(bib, "Rstudio")` es un entorno de desarrollo integrado (*Integrated Development Environment* IDE) que facilita la programación.
-
-- R permite realizar estadísticas geoespaciales, modelado y visualización con paquetes especializados.
 
 
 ---
 
+# GitHub
+
+- GitHub es una plataforma de desarrollo colaborativo para alojar proyectos utilizando el sistema de control de versiones Git
+
+- El código de los proyectos alojados en GitHub se almacena típicamente de forma pública
+
+- El 4 de junio de 2018, Microsoft compró GitHub por la cantidad de 7.500 millones de dólares
+
+---
+
+```{r, echo = FALSE, out.width = "84%", purl = FALSE}
+knitr::include_graphics("images/DescargarGithub.gif")
+```
+
+---
+
+Una vez descargado, lo extraemos en una carpeta. 
+Abrimos con RStudio el proyecto llamado **VisualizaciónDatosEspaciales.Rproj**
+
+
+.left-column[.center-left[
+### Links de descarga
+
+- [`r icon::fa("r-project")`](https://cran.r-project.org/)
+- [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
+
+]]
+
+.right-column[
+
+```{r, echo = FALSE, out.width = "85%", purl = FALSE}
+knitr::include_graphics("images/AbrirProyectoyScript.gif")
+```
+
+]
+
+---
 
 ## Interfaz de RStudio
 
@@ -184,7 +204,7 @@ knitr::include_graphics("images/Rstudiopartes.jpg")
 
 ```{r}
 2+2
-normalAleatorio <- rnorm(10, mean = 0, sd = 1) 
+normalAleatorio <- rnorm(10, mean = 0, sd = 1)
 normalAleatorio
 ```
 
@@ -209,7 +229,7 @@ class: inverse, middle, center
 
 # Datos espaciales en R
 
-+ Los datos vectoriales, usando puntos, líneas y polígonos, permiten representar superficies `r icon::fa("globe-americas")` 
++ Los datos vectoriales, usando puntos, líneas y polígonos, permiten representar superficies `r icon::fa("globe-americas")`
 + Los datos tipo *raster* divide la superficie en celdas (pixeles) de tamaño constante
 
 
@@ -219,7 +239,7 @@ class: inverse, middle, center
 
 
 
-```{r, echo = FALSE, out.width = "10%", purl = FALSE}
+```{r, echo = FALSE, out.width = "20%", purl = FALSE}
 knitr::include_graphics("images/SateliteTrabajando.gif")
 ```
 
@@ -263,8 +283,8 @@ El paquete `sf` implementa *simple features* en R y conserva las mismas capacida
 - Herramientas para el manejo de objetos
     + Media, mediana de valores de punto dentro de poligono
     + Conteo de puntos dentro de un poligono
-    + Union puntos, union diferentes capas 
- 
+    + Union puntos, union diferentes capas
+
 
 
 ---
@@ -290,7 +310,11 @@ En vez de cargar todo el *raster* en la memoria RAM, tiene la posibilidad de div
 --
     + Proyecciones de sistemas de coordenadas de referencia: Basados en coordenadas Cartesianas en una superficie plana (*UTM*)
 
-
+.center[
+```{r, echo = FALSE, out.width = "34%", purl = FALSE }
+knitr::include_graphics("images/Proyecciones.gif")
+```
+]
 ---
 layout: false
 class: inverse, middle, center
@@ -303,11 +327,37 @@ class: inverse, middle, center
 
 # Lectura de archivos
 
-  + Vectoriales
-      - shp (departamentos y cuencas de la Provincia de Córdoba)
-      - desde archivo de texto (Muestreo de Suelo de la Provincia)
+- Desde un archivo *Shapefile* (.shp) (cuanecas de la Provincia de Córdoba)
+- Desde un archivo *GeoPackage* (.gpkg) (departamentos de la Provincia de Córdoba)
+- Desde archivo de *texto* (Muestreo de Suelo de la Provincia de Córdoba)
 
   .center[`r icon::fa("globe", size = 2.3)` ]
+
+
+---
+
+# Lectura de archivo *Shapefile*
+
+*Shapefile* consisten en varios archivos de datos espaciales, con el mimso nombre base que residen en el mismo directorio. Fue desarrollado por la compañía ESRI
+
+- .shp: es el archivo principal que almacena la geometría de la entidad
+- .shx: es el archivo de índice que almacena el índice de la geometría de la entidad
+- .dbf: es la tabla dBASE que almacena la información de atributos de las entidades
+- .prj: es el archivo que almacena información del sistema de coordenadas
+- .xml: metadatos de ArcGIS, es el archivo que almacena información sobre el shapefile
+- .sbn y .sbx: son los archivos que almacenan el índice espacial de las entidades
+
+Los tres primeros son obligatorios.
+
+???
+
+.fbn y .fbx: son los archivos que almacenan el índice espacial de las entidades para los shapefiles que son solo de lectura.
+.ain y .aih: son los archivos que almacenan el índice de atributo de los campos activos en una tabla o una tabla de atributos del tema.
+.atx: se crea un archivo .atx para cada shapefile o índice de atributos de shapefile dBase creado en ArcCatalog. ArcGIS no utiliza los índices de atributo de ArcView GIS 3.x de los archivos shapefile y dBase. Se ha creado un nuevo modelo de indexación de atributos para los archivos shapefile y dBase.
+.ixs: índice de geocodificación para los shapefiles de lectura y escritura.
+.mxs: índice de geocodificación para los shapefiles de lectura y escritura (formato ODB).
+.cpg: es un archivo opcional que se puede utilizar para especificar la página de código para identificar el conjunto de caracteres que se va a utilizar.
+
 
 ---
 # Vectoriales
@@ -362,7 +412,7 @@ Si queremos sacar la leyenda?
 plot(departamentos["departa"], key.pos = NULL)
 ```
 
-??? 
+???
 
 Podemos cambiar el titulo
 
@@ -374,10 +424,22 @@ plot(departamentos["departa"], key.pos = NULL, main = "Departamentos")
 
 ---
 
+# Lectura de archivo *GeoPackage*
+
+- *GeoPackage* es un formato de archivo universal construido sobre la base de SQLite, para compartir y transferir datos espaciales vectoriales **y** raster.
+- A diferencia de los *shapesfiles*, se trata de un único archivo **.gpkg**, por lo que es ideal para transferir información geoespacial
+- Se ha diseñado para almacenar datos complejos y voluminosos (hasta 140 TB)
+- Permite almacenar diferentes tipos de geometrías en un mismo archivo: Point, Line, Polygon, MultiPoint, MultiLine, MultiPolygon, CompoundCurve, CurvedPolygon, MultiCurve y MultiSurface
+- GeoPackage destaca por su flexibilidad y se puede utilizar de muchas maneras, por lo que puede reemplazar al formato shapefile
+
+
+---
+
+
 ## Ahora visualicemos `cuencas`
 
 ```{r}
-head(cuencas <- read_sf("datos/cuencas_cba", stringsAsFactors = TRUE), 2)
+head(cuencas <- read_sf("datos/cuencas_cba/cuencas_cba.gpkg", stringsAsFactors = TRUE), 2)
 
 ```
 
@@ -402,7 +464,7 @@ plot(cuencas)
 .pull-left[
 
 ```{r}
-plot(departamentos["departa"], 
+plot(departamentos["departa"],
      main = NULL, col = "transparent")
 ```
 
@@ -411,7 +473,7 @@ plot(departamentos["departa"],
 .pull-right[
 
 ```{r}
-plot(cuencas["AREA"], 
+plot(cuencas["AREA"],
      main = NULL, col = "transparent")
 ```
 
@@ -425,7 +487,7 @@ plot(cuencas["AREA"],
 
 
 ```{r, fig.height=5.5}
-plot(departamentos["departa"], col = "transparent", main = NULL, 
+plot(departamentos["departa"], col = "transparent", main = NULL,
      reset = FALSE) #<<
 plot(cuencas["AREA"], col = "transparent", add = TRUE)
 
@@ -518,22 +580,22 @@ prettymapr::addscalebar()
 
 ```{r plot-prettyCm, results='hide', fig.show = 'hide'}
 prettymap(plot(departamentos["departa"],
-               col = "transparent", 
-               main = "Departamentos"), 
+               col = "transparent",
+               main = "Departamentos"),
           drawarrow=TRUE)
 
 ```
 
 ---
 
-.left-column[ 
+.left-column[
 La escala está en centímetros!
 
 .center[`r icon::fa("frown")`]
 
 ]
 
-.right-column[ 
+.right-column[
 
 ```{r ref.label = 'plot-prettyCm', echo = FALSE, warning=FALSE, message=FALSE}
 ```
@@ -546,22 +608,22 @@ La escala está en centímetros!
 
 ```{r plot-prettyKm, results='hide', fig.show = 'hide'}
 prettymap(plot(departamentos["departa"],
-               col = "transparent", 
-               main = "Departamentos"), 
-          drawarrow=TRUE, 
+               col = "transparent",
+               main = "Departamentos"),
+          drawarrow=TRUE,
           scale.plotepsg = 4326) #<<
 
 ```
 
 ---
 
-.left-column[ 
+.left-column[
 
 .center[`r icon::fa("laugh-beam")`]
 
 ]
 
-.right-column[ 
+.right-column[
 ```{r ref.label = 'plot-prettyKm', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
@@ -668,17 +730,17 @@ Idividualmente se especifican partes del gráfico. Luego estas partes se combina
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r ggplot-cuencas, fig.show = 'hide'}
 ggplot(cuencas) +
-  geom_sf() 
+  geom_sf()
 ```
 
 ]
 
-.pull-right[ 
+.pull-right[
 ```{r ref.label = 'ggplot-cuencas', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
 
@@ -689,14 +751,14 @@ ggplot(cuencas) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r ggplot-cuencasMuestreo, fig.show = 'hide'}
 
 ggCuencasMuestero <- ggplot() +
   geom_sf(data = cuencas) +
-  geom_sf(data = muestreo, 
+  geom_sf(data = muestreo,
           aes( color = Limo), size = 3)
 
 
@@ -704,7 +766,7 @@ ggCuencasMuestero <- ggplot() +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r, echo = FALSE, warning=FALSE, message=FALSE}
 ggCuencasMuestero
@@ -715,7 +777,7 @@ ggCuencasMuestero
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r ggplot-cuencasMuestNA, fig.show = 'hide'}
@@ -727,7 +789,7 @@ ggCuencasMuestero + #<<
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'ggplot-cuencasMuestNA', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
@@ -801,14 +863,14 @@ mediaCC
 
 ```
 
- 
+
 
 
 ---
 
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r ggplot-cuencasMediaCC, fig.show = 'hide'}
@@ -820,7 +882,7 @@ ggplot(cuencasUTM) +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'ggplot-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
@@ -831,7 +893,7 @@ ggplot(cuencasUTM) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r ggplot-cuencasMediaCClab, fig.show = 'hide'}
@@ -843,7 +905,7 @@ ggplot(cuencasUTM) +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'ggplot-cuencasMediaCClab', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
@@ -873,7 +935,7 @@ tm_shape(cuencasUTM) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r tmap-cuencasMediaCC, fig.show = 'hide'}
@@ -885,7 +947,7 @@ tm_shape(cuencasUTM) +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'tmap-cuencasMediaCC', echo = FALSE, warning=FALSE, message=FALSE, purl = FALSE}
 ```
@@ -897,20 +959,20 @@ tm_shape(cuencasUTM) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r tmap-cuencasMediaCCquant, fig.show = 'hide', results = 'hide'}
 tm_shape(cuencasUTM) +
   tm_fill("MediaCC", style = "quantile") +
   tm_borders() +
-  tm_basemap() 
+  tm_basemap()
 
 ```
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'tmap-cuencasMediaCCquant', echo = FALSE, warning=FALSE, message=FALSE}
 ```
@@ -921,7 +983,7 @@ tm_shape(cuencasUTM) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r tmap-cuencasMediaCCquantInterac, fig.show = 'hide', results = 'hide'}
@@ -929,13 +991,13 @@ tmap_mode("view")
 tm_shape(cuencasUTM) +
   tm_fill("MediaCC", style = "quantile") +
   tm_borders() +
-  tm_basemap() 
+  tm_basemap()
 
 ```
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'tmap-cuencasMediaCCquantInterac', echo = FALSE, warning=FALSE, message=FALSE}
 ```
@@ -946,7 +1008,7 @@ tm_shape(cuencasUTM) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r tmap-cuencasMediaCCquantInteracFondo, fig.show = 'hide', results = 'hide'}
@@ -962,7 +1024,7 @@ tm_shape(cuencasUTM) +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'tmap-cuencasMediaCCquantInteracFondo', echo = FALSE, warning=FALSE, message=FALSE}
 ```
@@ -973,7 +1035,7 @@ tm_shape(cuencasUTM) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r tmap-cuencasMediaCCicono, fig.show = 'hide', results = 'hide'}
@@ -982,7 +1044,7 @@ tm_shape(cuencasUTM) +
   tm_fill("MediaCC") +
   tm_borders() +
   tm_basemap() +
-  tm_symbols(size = "AREA", 
+  tm_symbols(size = "AREA",
              shape = tmap_icons("https://png.pngtree.com/svg/20160627/area_1270351.png"))
 
 
@@ -990,7 +1052,7 @@ tm_shape(cuencasUTM) +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'tmap-cuencasMediaCCicono', echo = FALSE, warning=FALSE, message=FALSE}
 ```
@@ -1001,7 +1063,7 @@ tm_shape(cuencasUTM) +
 ---
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r tmap-cuencasSeparadorTexto, fig.show = 'hide', results = 'hide'}
@@ -1018,7 +1080,7 @@ tm_shape(cuencasUTM) +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r ref.label = 'tmap-cuencasSeparadorTexto', echo = FALSE, warning=FALSE, message=FALSE, purl=FALSE}
 ```
@@ -1130,7 +1192,7 @@ tm_shape(cuencasUTM) +
 
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r}
@@ -1146,7 +1208,7 @@ tmap_cuencas
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 ```{r}
 tmap_muestreo <-   tm_shape(muestreo) +
@@ -1171,7 +1233,7 @@ tmap_arrange(tmap_cuencas, tmap_muestreo)
 
 
 
-.pull-left[ 
+.pull-left[
 
 
 ```{r tmap-cuencasMuestreo, fig.show = 'hide', results = 'hide'}
@@ -1188,7 +1250,7 @@ tm_shape(muestreo) +
 
 ]
 
-.pull-right[ 
+.pull-right[
 
 
 ```{r ref.label = 'tmap-cuencasMuestreo', echo = FALSE, warning=FALSE, message=FALSE, purl=FALSE}
@@ -1221,7 +1283,7 @@ leaflet() %>%
   addCircles(data = muestreoLatLong) %>%
   addMiniMap(position = "topleft" , width = 150, height = 150) %>%
   addLogo("https://media.giphy.com/media/l1LcbeAkRm2UrdNio/giphy.gif",
-          position = "bottomleft",offset.x = 5, offset.y = 100, width = 480, height = 270) 
+          position = "bottomleft",offset.x = 5, offset.y = 100, width = 480, height = 270)
 ```
 
 
