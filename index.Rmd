@@ -119,6 +119,7 @@ invisible(sapply(libs, library,character.only = T, quietly=T))
 1. Introducción a R
 1. Manejo de datos espaciales con `sf`
     + Lectura de archivos de diferentes formatos
+        - Geopackage
         - Shapefile
         - Base de datos de texto (*data frame*)
     + Manejo de objetos `sf`
@@ -249,7 +250,7 @@ knitr::include_graphics("images/SateliteTrabajando.gif")
 
 # Paquete `sf`
 
-*Simple features* es una manera estandarizada de codificar, en computadoras, datos **vectoriales** (puntos, lineas y polígonos) `r icon::fa("draw-polygon")`
+*Simple features* es una manera estandarizada de codificar, en computadoras, datos **vectoriales** (puntos`r icon::fa("ellipsis-h")`, lineas`r icon::fa("star-of-life")` y polígonos`r icon::fa("draw-polygon")`) 
 
 El paquete `sf` implementa *simple features* en R y conserva las mismas capacidades para el manejo de datos vectoriales como los paquetes `sp`, `rgeos` y `rgdal` `r Cite(bib, "Pebesma_RJ")`
 
@@ -308,7 +309,7 @@ En vez de cargar todo el *raster* en la memoria RAM, tiene la posibilidad de div
 - Pueden ser
     + Sistemas de coordenadas geográficas: Identifica cualquier punto de la superficie terrestre utilizando dos valores: Latitud y Longitud (*lat long*)
 --
-    + Proyecciones de sistemas de coordenadas de referencia: Basados en coordenadas Cartesianas en una superficie plana (*UTM*)
+    + Proyecciones de sistemas de coordenadas de referencia: Basados en coordenadas Cartesianas en una superficie plana (Ejemplo *UTM*)
 
 .center[
 ```{r, echo = FALSE, out.width = "34%", purl = FALSE }
@@ -327,8 +328,8 @@ class: inverse, middle, center
 
 # Lectura de archivos
 
-- Desde un archivo *Shapefile* (.shp) (cuanecas de la Provincia de Córdoba)
-- Desde un archivo *GeoPackage* (.gpkg) (departamentos de la Provincia de Córdoba)
+- Desde un archivo *Shapefile* (.shp) (Cuencas de la Provincia de Córdoba)
+- Desde un archivo *GeoPackage* (.gpkg) (Departamentos de la Provincia de Córdoba)
 - Desde archivo de *texto* (Muestreo de Suelo de la Provincia de Córdoba)
 
   .center[`r icon::fa("globe", size = 2.3)` ]
@@ -338,28 +339,28 @@ class: inverse, middle, center
 
 # Lectura de archivo *Shapefile*
 
-*Shapefile* consisten en varios archivos de datos espaciales, con el mimso nombre base que residen en el mismo directorio. Fue desarrollado por la compañía ESRI
+*Shapefile* consisten en varios archivos de datos espaciales, con el mimso nombre base que residen en el mismo directorio. Fue desarrollado por la compañía ESRI.
 
-- .shp: es el archivo principal que almacena la geometría de la entidad
-- .shx: es el archivo de índice que almacena el índice de la geometría de la entidad
-- .dbf: es la tabla dBASE que almacena la información de atributos de las entidades
-- .prj: es el archivo que almacena información del sistema de coordenadas
-- .xml: metadatos de ArcGIS, es el archivo que almacena información sobre el shapefile
-- .sbn y .sbx: son los archivos que almacenan el índice espacial de las entidades
+- **.shp**: es el archivo principal que almacena la geometría de la entidad
+- **.shx**: es el archivo de índice que almacena el índice de la geometría de la entidad
+- **.dbf**: es la tabla dBASE que almacena la información de atributos de las entidades
+- **.prj**: es el archivo que almacena información del sistema de coordenadas
+- **.xml**: metadatos de ArcGIS, es el archivo que almacena información sobre el shapefile
+- **.sbn** y **.sbx**: son los archivos que almacenan el índice espacial de las entidades
 
 Los tres primeros son obligatorios.
 
 ???
 
-.fbn y .fbx: son los archivos que almacenan el índice espacial de las entidades para los shapefiles que son solo de lectura.
-.ain y .aih: son los archivos que almacenan el índice de atributo de los campos activos en una tabla o una tabla de atributos del tema.
-.atx: se crea un archivo .atx para cada shapefile o índice de atributos de shapefile dBase creado en ArcCatalog. ArcGIS no utiliza los índices de atributo de ArcView GIS 3.x de los archivos shapefile y dBase. Se ha creado un nuevo modelo de indexación de atributos para los archivos shapefile y dBase.
-.ixs: índice de geocodificación para los shapefiles de lectura y escritura.
-.mxs: índice de geocodificación para los shapefiles de lectura y escritura (formato ODB).
-.cpg: es un archivo opcional que se puede utilizar para especificar la página de código para identificar el conjunto de caracteres que se va a utilizar.
-
+- .fbn y .fbx: son los archivos que almacenan el índice espacial de las entidades para los shapefiles que son solo de lectura.
+- .ain y .aih: son los archivos que almacenan el índice de atributo de los campos activos en una tabla o una tabla de atributos del tema.
+- .atx: se crea un archivo .atx para cada shapefile o índice de atributos de shapefile dBase creado en ArcCatalog. ArcGIS no utiliza los índices de atributo de ArcView GIS 3.x de los archivos shapefile y dBase. Se ha creado un nuevo modelo de indexación de atributos para los archivos shapefile y dBase.
+- .ixs: índice de geocodificación para los shapefiles de lectura y escritura.
+- .mxs: índice de geocodificación para los shapefiles de lectura y escritura (formato ODB).
+- .cpg: es un archivo opcional que se puede utilizar para especificar la página de código para identificar el conjunto de caracteres que se va a utilizar.
 
 ---
+
 # Vectoriales
 
 ```{r, highlight.output=c(1,2,6,9)}
@@ -489,8 +490,16 @@ plot(cuencas["AREA"],
 ```{r, fig.height=5.5}
 plot(departamentos["departa"], col = "transparent", main = NULL,
      reset = FALSE) #<<
-plot(cuencas["AREA"], col = "transparent", add = TRUE)
+plot(cuencas["AREA"], col = "transparent", 
+     add = TRUE) #<<
 
+```
+
+
+--
+
+```{r, echo = FALSE, out.width = "34%", purl = FALSE }
+knitr::include_graphics("images/Deception.gif")
 ```
 
 ---
@@ -798,7 +807,7 @@ ggCuencasMuestero + #<<
 
 ---
 
-# Cuantos puntosde muestreo hay en cada cuenca??? `r icon::fa("pencil-ruler")`
+# Cuantos puntos de muestreo hay en cada cuenca??? `r icon::fa("pencil-ruler")`
 
 
 ```{r, error=TRUE}
@@ -927,7 +936,7 @@ tm_shape(cuencasUTM) +
 # Paquete `tmap`
 
 - La sintaxis es similar a `ggplot2`, pero orientada a mapas
-- La mayoría de las funciones comienzan con `tmap_`
+- La mayoría de las funciones comienzan con `tm_`
 - Para comenzar a graficar, es necesario especificarlo con `tm_shape`
 - Las capas se agregan mediante `+`
 - Permite graficar mapas estáticos o interactivos con el mismo código `tmap_mode()`.
