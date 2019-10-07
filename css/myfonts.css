@@ -1,8 +1,24 @@
+
+@import url(https://fonts.googleapis.com/css?family=Cormorant+Upright);
+@import url(https://fonts.googleapis.com/css?family=Inconsolata);
+@import url(https://fonts.googleapis.com/css?family=Inconsolata);
+
+
+
 pre {
   max-width: 100%;
   overflow-x: auto;
   overflow-y: auto;
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1em 0px;
+    margin-top: 0em;
+    margin-right: 0px;
+    margin-bottom: 0.5em;
+    margin-left: 0px;
 }
+
 
 img {
     max-width: 100%;
@@ -83,19 +99,68 @@ img {
   font-size: 90%;
 }
 
-<style>
-pre {
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    margin: 1em 0px;
-    margin-top: 0em;
-    margin-right: 0px;
-    margin-bottom: 0em;
-    margin-left: 0px;
+
+.my-logo-right {
+content: "";
+    position: absolute;
+    bottom: 10%;
+    right:   1%;
+    height: 35%;
+    width: 35%;
+    background-color:  #1d5357;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url(http://biometria2019.fca.uncu.edu.ar/images/logo_l.png);
 }
-</style>
+
+.title-slide .titulo, .subtitulo {
+  font-family: 'Yanone Kaffeesatz';
+  font-weight: normal;
+  text-shadow: none;
+  color: #F7F8FA;
+ /* margin-top: -70px; */
+}
+
+.title-slide .titulo {
+  font-size: 66px;
+}
+
+.title-slide .subtitulo {
+  font-size: 55px;
+}
+
+.title-slide .autores {
+  font-family: 'Yanone Kaffeesatz';
+  font-weight: normal;
+  text-shadow: none;
+  color: #F7F8FA;
+  font-size: 45px;
+  line-height: 1.2;
+}
+
+.tleft {
+  position: absolute;
+  bottom: 10px;
+  right:   8px;
+}
+
+.abajo{
+  position: absolute;
+  left: 50%;
+  bottom: 3%;
+}
+
+.fancy{
+  font-family: 'Cormorant Upright', serif;
+  font-weight: 700;
+}
 
 
+.remark-code, .remark-inline-code {
+    color: #e74a2f;
+}
 
+.remark-code {
+    font-size: 30px;
+}
   
