@@ -84,7 +84,7 @@ options(htmltools.dir.version = FALSE)
 ```{r cargaLibrerias, echo=FALSE, include=FALSE}
 # Esto es un comentario
 # Esta es otra linea de comentario
-# ahora vamos a sumar algo
+# ahora vamos a sumar
 2 + 2
 
 #Y podemos almacenar un resultado en un objeto
@@ -93,9 +93,9 @@ resultado <- 2 + 2
 resultado
 
 
-#Comencemos instalando paquetes especializados
-libs <- c("sf", "ggmap", "prettymapr",
-          "tmap", "leaflet","leafem", "ggplot2","units","ggsn","ggspatial")
+#Instalemos y carguemos paquetes especializados
+libs <- c("sf","units", "prettymapr","tmap", "leaflet","leafem",
+           "ggplot2","ggmap","ggsn","ggspatial")
 
 new.packages <- libs[!(libs %in% rownames(installed.packages()))]
 if(length(new.packages)) install.packages(new.packages)
@@ -127,7 +127,7 @@ class: title-slide
 <br>
 `r icon::fa('paper-plane')` pablopaccioretti@agro.unc.edu.ar
 
-.small[Facultad de Ciencias Agropecuaras - UNC - CONICET]
+.small[Facultad de Ciencias Agropecuarias - UNC - CONICET]
 
 .tleft[`r format(Sys.Date(), '%B %Y')`]
 
@@ -1399,8 +1399,8 @@ tmap_arrange(tmap_cuencas, tmap_muestreo)
 
 ---
 
-```{r, fig.width=4}
-tmap_mode("view")
+```{r}
+# tmap_mode("view")
 tm_shape(cuencasUTM) +
   tm_fill("MediaLimo", palette="RdYlGn", title.size = "Media Limo") +
   tm_borders() +

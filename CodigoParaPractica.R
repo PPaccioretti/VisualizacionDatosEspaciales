@@ -1,7 +1,7 @@
 ## ----cargaLibrerias, echo=FALSE, include=FALSE---------------------------
 # Esto es un comentario
 # Esta es otra linea de comentario
-# ahora vamos a sumar algo
+# ahora vamos a sumar
 2 + 2
 
 #Y podemos almacenar un resultado en un objeto
@@ -10,9 +10,9 @@ resultado <- 2 + 2
 resultado
 
 
-#Comencemos instalando paquetes especializados
-libs <- c("sf", "ggmap", "prettymapr",
-          "tmap", "leaflet","leafem", "ggplot2","units","ggsn","ggspatial")
+#Instalemos y carguemos paquetes especializados
+libs <- c("sf","units", "prettymapr","tmap", "leaflet","leafem",
+           "ggplot2","ggmap","ggsn","ggspatial")
 
 new.packages <- libs[!(libs %in% rownames(installed.packages()))]
 if(length(new.packages)) install.packages(new.packages)
