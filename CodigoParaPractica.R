@@ -1,16 +1,19 @@
-## ----cargaLibrerias------------------------------------------------------
+## ----cargaLibrerias, echo=FALSE, include=FALSE---------------------------
+# Esto es un comentario
+# Esta es otra linea de comentario
+# ahora vamos a sumar algo
+2 + 2
 
-library(sf)
-library(ggplot2)
-library(ggmap)
-library(prettymapr)
-library(units)
-library(tmap)
-library(leaflet)
-library(leafem)
+#Y podemos almacenar un resultado en un objeto
+resultado <- 2 + 2
+# para verlo tenemos que "llamar" a ese objeto
+resultado
 
 
-libs <- c("sf", "ggmap", "prettymapr", "tmap", "leaflet","leafem", "ggplot2","units")
+#Comencemos instalando paquetes especializados
+libs <- c("sf", "ggmap", "prettymapr",
+          "tmap", "leaflet","leafem", "ggplot2","units","ggsn","ggspatial")
+
 new.packages <- libs[!(libs %in% rownames(installed.packages()))]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -20,16 +23,23 @@ invisible(sapply(libs, library,character.only = T, quietly=T))
 
 
 
+
+
+
+
 ## ------------------------------------------------------------------------
 2+2
-normalAleatorio <- rnorm(10, mean = 0, sd = 1) 
+normalAleatorio <- rnorm(10, mean = 0, sd = 1)
 normalAleatorio
 
 
 
 
+
+
+
 ## ---- highlight.output=c(1,2,6,9)----------------------------------------
-head(departamentos <- read_sf("datos/deptos_cba", stringsAsFactors = TRUE), 3)
+print(departamentos <- read_sf("datos/deptos_cba", stringsAsFactors = TRUE), n = 3)
 
 
 ## ------------------------------------------------------------------------
@@ -57,32 +67,37 @@ plot(departamentos["departa"], key.pos = NULL, main = "Departamentos")
 
 
 ## ------------------------------------------------------------------------
-head(cuencas <- read_sf("datos/cuencas_cba", stringsAsFactors = TRUE), 2)
+print(cuencas <- read_sf("datos/cuencas_cba/cuencas_cba.gpkg", stringsAsFactors = TRUE), n = 2)
 
 
 
 ## ------------------------------------------------------------------------
-summary(cuencas)
+summary(cuencas, maxsum = 3)
 
 
-## ---- fig.height=5.5-----------------------------------------------------
+## ---- fig.height=7.5-----------------------------------------------------
 plot(cuencas)
 
 
 ## ------------------------------------------------------------------------
-plot(departamentos["departa"], 
+plot(departamentos["departa"],
      main = NULL, col = "transparent")
 
 
 ## ------------------------------------------------------------------------
-plot(cuencas["AREA"], 
+plot(cuencas["AREA"],
      main = NULL, col = "transparent")
 
 
-## ---- fig.height=5.5-----------------------------------------------------
-plot(departamentos["departa"], col = "transparent", main = NULL, 
+## ----plot-plotSinEstarJuntos, fig.height=5.5, results='hide', fig.show = 'hide'----
+plot(departamentos["departa"], col = "transparent", main = NULL,
      reset = FALSE) #<<
-plot(cuencas["AREA"], col = "transparent", add = TRUE)
+plot(cuencas["AREA"], col = "transparent",
+     add = TRUE) #<<
+
+
+## ----ref.label = 'plot-plotSinEstarJuntos', fig.height=5.2, echo = FALSE, warning=FALSE, message=FALSE----
+
 
 
 
@@ -109,7 +124,7 @@ st_crs(departamentos) == st_crs(cuencas)
 
 
 ## ---- highlight.output=c(5, 6)-------------------------------------------
-head(cuencas,4)
+print(cuencas, n = 4)
 
 
 ## ------------------------------------------------------------------------
@@ -118,20 +133,22 @@ plot(cuencas["AREA"], col = "transparent", add = TRUE)
 
 
 
+
+
 ## ------------------------------------------------------------------------
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 
 
 ## ---- fig.height = 5.3---------------------------------------------------
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
 
 
 ## ---- fig.height=5.2-----------------------------------------------------
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
 prettymapr::addnortharrow()
 
@@ -139,7 +156,7 @@ prettymapr::addnortharrow()
 
 ## ----plot-departamentos, results='hide', fig.show = 'hide'---------------
 plot(departamentos["departa"], col = "transparent", main = NULL, reset = FALSE)
-plot(cuencas["AREA"], add = TRUE, col = "transparent", border = "red")
+plot(cuencas["AREA"], col = "transparent", add = TRUE, border = "red")
 legend("bottomright", legend = c("Límites departamentales", "Cuencas"), col = c("black", "red"), lty = 1, lwd = 3)
 prettymapr::addnortharrow()
 prettymapr::addscalebar()
@@ -150,8 +167,8 @@ prettymapr::addscalebar()
 
 ## ----plot-prettyCm, results='hide', fig.show = 'hide'--------------------
 prettymap(plot(departamentos["departa"],
-               col = "transparent", 
-               main = "Departamentos"), 
+               col = "transparent",
+               main = "Departamentos"),
           drawarrow=TRUE)
 
 
@@ -159,11 +176,11 @@ prettymap(plot(departamentos["departa"],
 ## ----ref.label = 'plot-prettyCm', echo = FALSE, warning=FALSE, message=FALSE----
 
 
-## ----plot-prettyKm, results='hide', fig.show = 'hide'--------------------
+## ----plot-prettyKm, results='hide', fig.show = 'hide', fig.height=5.5, fig.width=3----
 prettymap(plot(departamentos["departa"],
-               col = "transparent", 
-               main = "Departamentos"), 
-          drawarrow=TRUE, 
+               col = "transparent",
+               main = "Departamentos"),
+          drawarrow=TRUE,
           scale.plotepsg = 4326) #<<
 
 
@@ -191,26 +208,23 @@ plot(cuencas["AREA"], axes = TRUE, bgMap= Mapa)
 
 ## ---- echo = FALSE, warning=FALSE, message=FALSE-------------------------
 cuencas <- st_transform(cuencas, crs = st_crs(3857))
-plot(cuencas["AREA"], axes = TRUE, bgMap= Mapa)
+plot(cuencas["AREA"], axes = TRUE, col = "transparent", bgMap= Mapa)
 addnortharrow()
 addscalebar()
 
 
 ## ------------------------------------------------------------------------
-head(muestreo <- read.table("datos/MuestreoSuelo.txt", header = T, sep = "\t"),8)
+muestreo <- read.table("datos/MuestreoSuelo.txt", header = T, sep = "\t")
+
+
+## ---- eval = FALSE, echo=FALSE-------------------------------------------
+## muestreo
+
+
 
 
 ## ------------------------------------------------------------------------
-head(muestreo <- st_as_sf(muestreo, coords = c("Xt", "Yt"), crs = 32720), 5)
-
-
-
-## ------------------------------------------------------------------------
-
-muestreoLatLong <- st_transform(muestreo, st_crs(departamentos))
-plot(departamentos["departa"], col = "transparent", reset = FALSE)
-plot(muestreoLatLong["Limo"], add = TRUE)
-
+print(muestreo <- st_as_sf(muestreo, coords = c("Xt", "Yt"), crs = 32720), n = 5)
 
 
 
@@ -222,37 +236,75 @@ summary(muestreo)
 plot(muestreo, pch = 18 , cex = 3)
 
 
-## ----ggplot-cuencas, fig.show = 'hide'-----------------------------------
-ggplot(cuencas) +
-  geom_sf() 
+## ------------------------------------------------------------------------
+
+ggplot(muestreo) +
+  geom_sf()
 
 
+
+## ------------------------------------------------------------------------
+ggplot(muestreo) +
+  geom_sf(aes(fill = Limo), shape = 22, size = 3)
+
+
+
+## ------------------------------------------------------------------------
+
+ggplot(muestreo) +
+  geom_sf(aes(fill = Limo), shape = 22, size = 3) +
+  geom_sf(data = departamentos)
+
+
+
+## ------------------------------------------------------------------------
+ggplot(muestreo) +
+  geom_sf(data = departamentos) +
+  geom_sf(aes(fill = Limo), shape = 22, size = 3) 
+ 
+
+
+## ------------------------------------------------------------------------
+ggplot() 
+
+
+## ------------------------------------------------------------------------
+ggplot() +
+  geom_sf(data = cuencas)
+
+
+## ------------------------------------------------------------------------
+ggplot() +
+  geom_sf(data = cuencas) +
+  geom_sf(data = muestreo)
+
+
+## ---- fig.height=5.5-----------------------------------------------------
+ggCuencasMuestero <- ggplot() +
+  geom_sf(data = cuencas) +
+  geom_sf(data = muestreo, aes(color = Limo), size = 3) 
+ggCuencasMuestero
 
 
 ## ----ggplot-cuencasMuestreo, fig.show = 'hide'---------------------------
-
-ggCuencasMuestero <- ggplot() +
-  geom_sf(data = cuencas) +
-  geom_sf(data = muestreo, 
-          aes( color = Limo), size = 3)
+ggCuencasMuestero + #<<
+  scale_color_continuous(type = "viridis")
 
 
-
-
-## ---- echo = FALSE, warning=FALSE, message=FALSE-------------------------
-ggCuencasMuestero
+## ---- ref.label='ggplot-cuencasMuestreo', echo = FALSE, warning=FALSE, message=FALSE----
 
 
 ## ----ggplot-cuencasMuestNA, fig.show = 'hide'----------------------------
 
 ggCuencasMuestero + #<<
-  scale_color_continuous(na.value = "red")
+  scale_color_continuous(type = "viridis", na.value = "pink")
 
 
 
 
 
 ## ---- error=TRUE---------------------------------------------------------
+muestreoLatLong <- st_transform(muestreo, st_crs(departamentos))
 st_covers(cuencas, muestreoLatLong)
 
 
@@ -278,38 +330,54 @@ cuencasUTM$CantidadMuestrasKm
 plot(cuencasUTM["CantidadMuestrasKm"])
 
 
-
 ## ------------------------------------------------------------------------
-
-
 st_covers(cuencasUTM,muestreo)
 
 
 
 ## ---- highlight.output=c(1,2,3)------------------------------------------
- mediaCC <- sapply(st_covers(cuencasUTM,muestreo), function(x) {
-  mean(muestreo[x,][["CC"]], na.rm = TRUE)
+ mediaLimo <- sapply(st_covers(cuencasUTM,muestreo), function(x) {
+  mean(muestreo[x,][["Limo"]], na.rm = TRUE)
      })
-mediaCC
+mediaLimo
 
 
 
 
-## ----ggplot-cuencasMediaCC, fig.show = 'hide'----------------------------
-cuencasUTM$MediaCC <- mediaCC
+## ----ggplot-cuencasMediaLimo, fig.show = 'hide'--------------------------
+cuencasUTM$MediaLimo <- mediaLimo
 ggplot(cuencasUTM) +
-  geom_sf(aes(fill = MediaCC))
+  geom_sf(aes(fill = MediaLimo))
 
 
 
 
 
-## ----ggplot-cuencasMediaCClab, fig.show = 'hide'-------------------------
+## ----ggplot-cuencasMediaLimolab, fig.show = 'hide'-----------------------
 ggplot(cuencasUTM) +
-  geom_sf(aes(fill = MediaCC)) +
-  labs(fill = "Media C.C.")
+  geom_sf(aes(fill = MediaLimo)) +
+  labs(fill = "Limo (%)")
 
 
+
+
+
+## ---- fig.height=5-------------------------------------------------------
+ggplot(cuencasUTM) +
+  geom_sf(aes(fill = MediaLimo)) +
+  labs(fill = "Limo (%)") + 
+  ggsn::scalebar(cuencasUTM, dist = 50, transform = FALSE, dist_unit = "km")
+
+
+
+
+## ---- fig.height=5-------------------------------------------------------
+
+ggplot(cuencasUTM) +
+  geom_sf(aes(fill = MediaLimo)) +
+  labs(fill = "Limo (%)") + 
+  ggsn::scalebar(cuencasUTM, dist = 50, transform = FALSE, dist_unit = "km") + 
+  ggspatial::annotation_north_arrow(location = "tr", which_north = "grid")
 
 
 
@@ -319,197 +387,173 @@ tm_shape(cuencasUTM) +
 
 
 
-## ----tmap-cuencasMediaCC, fig.show = 'hide'------------------------------
+## ----tmap-cuencasMediaLimoSB---------------------------------------------
 tm_shape(cuencasUTM) +
-  tm_fill("MediaCC") +
+  tm_fill("MediaLimo")
+
+
+
+## ----tmap-cuencasMediaLimo, fig.show = 'hide'----------------------------
+tm_shape(cuencasUTM) +
+  tm_fill("MediaLimo") +
   tm_borders()
 
 
 
 
 
-## ----tmap-cuencasMediaCCquant, fig.show = 'hide', results = 'hide'-------
+## ------------------------------------------------------------------------
 tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", style = "quantile") +
-  tm_borders() +
-  tm_basemap() 
+  tm_fill("MediaLimo", style = "quantile") +
+  tm_borders() 
 
 
+## ------------------------------------------------------------------------
+tm_shape(cuencasUTM) +
+  tm_fill("MediaLimo", style = "cont") +
+  tm_borders() 
 
-## ----ref.label = 'tmap-cuencasMediaCCquant', echo = FALSE, warning=FALSE, message=FALSE----
 
-
-## ----tmap-cuencasMediaCCquantInterac, fig.show = 'hide', results = 'hide'----
+## ----tmap-cuencasMediaLimoContInterac, fig.show = 'hide', results = 'hide'----
 tmap_mode("view")
 tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", style = "quantile") +
+  tm_fill("MediaLimo", style = "cont") +
   tm_borders() +
-  tm_basemap() 
+  tm_basemap("Esri.WorldTopoMap")
 
 
 
-## ----ref.label = 'tmap-cuencasMediaCCquantInterac', echo = FALSE, warning=FALSE, message=FALSE----
+
+## ----ref.label = 'tmap-cuencasMediaLimoContInterac', echo = FALSE, warning=FALSE, message=FALSE----
 
 
-## ----tmap-cuencasMediaCCquantInteracFondo, fig.show = 'hide', results = 'hide'----
+## ----tmap-cuencasMediaLimoquantInteracFondo, fig.show = 'hide', results = 'hide'----
 tmap_mode("view")
 tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", style = "quantile") +
+  tm_fill("MediaLimo", style = "quantile", alpha = 0.8) +
   tm_borders() +
-  tm_basemap() +
-  tm_view(alpha = 1, basemaps = "Esri.WorldTopoMap") #<<
+  tm_basemap(c(
+    "Stamen.Watercolor",
+    "Esri",
+    "OpenTopoMap",
+    "Stamen.Terrain")) 
+# names(leaflet::providers)
 
 
 
 
-## ----ref.label = 'tmap-cuencasMediaCCquantInteracFondo', echo = FALSE, warning=FALSE, message=FALSE----
-
-
-## ----tmap-cuencasMediaCCicono, fig.show = 'hide', results = 'hide'-------
+## ----tmap-cuencasUTMPllette, fig.show = 'hide', results = 'hide'---------
 tmap_mode("plot")
-tm_shape(cuencasUTM) +
-  tm_fill("MediaCC") +
+cuencas_tmap <- tm_shape(cuencasUTM) +
+  tm_fill("MediaLimo", 
+          style = "cont", 
+          palette = c("red", "blue"),
+          textNA = "Sin Datos",
+          title.size = "Media Limo") +
   tm_borders() +
-  tm_basemap() +
-  tm_symbols(size = "AREA", 
-             shape = tmap_icons("https://png.pngtree.com/svg/20160627/area_1270351.png"))
-
-
-
-
-## ----ref.label = 'tmap-cuencasMediaCCicono', echo = FALSE, warning=FALSE, message=FALSE----
-
-
-## ----tmap-cuencasSeparadorTexto, fig.show = 'hide', results = 'hide'-----
-tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", palette="RdYlGn") +
-  tm_borders() +
-  tm_basemap() +
-  tm_symbols(size = "AREA") +
-  tm_scale_bar() +
-  tm_layout(legend.format = list(text.separator= " a ", text.align = "center"))
-
-
-
-
-
-
-## ------------------------------------------------------------------------
-
-
-tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC") +
-  tm_borders() +
-  tm_basemap() +
-  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
-  tm_scale_bar() +
-  tm_compass(position = c( "right", "top"))
-
-
-
-
-
-
-## ------------------------------------------------------------------------
-tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC") +
-  tm_borders() +
-  tm_basemap() +
-  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
-  tm_scale_bar() +
-  tm_compass(position = c( "right", "top")) +
   tm_legend(
     text.size=1,
     title.size=1.2,
     legend.outside=TRUE,
     frame="gray50",
     height=.6)
+cuencas_tmap #<<
 
 
 
-## ------------------------------------------------------------------------
 
+
+## ----tmap-muestreoNA, fig.show = 'hide', results = 'hide'----------------
+muestreo_tmap <- tm_shape(muestreo) +
+  tm_dots("Limo", size = 0.5,
+          palette = "BuGn", colorNA= NULL,
+          legend.hist=T) +
+  tm_layout(legend.format = list(text.separator= " a "),
+            legend.outside = TRUE,
+            legend.hist.width = 2.5)
+muestreo_tmap #<<
+
+
+
+
+
+
+
+
+
+## ----tmap-doscapas, fig.show = 'hide', results = 'hide'------------------
 tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC") +
+  tm_fill("MediaLimo", 
+          style = "cont", 
+          palette = c("red", "blue"),
+          textNA = "Sin Datos",
+          title.size = "Media Limo") +
   tm_borders() +
-  tm_basemap() +
-  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
-  tm_scale_bar() +
-  tm_compass(position = c( "right", "top")) +
-  tm_facets("SISTEMA",nrow = 1)
+  tm_legend(
+    text.size=1,
+    title.size=1.2,
+    legend.outside=TRUE,
+    frame="gray50",
+    height=.6) +
+  tm_shape(muestreo) +
+  tm_dots("Limo", size = 0.5,
+          palette = "BuGn", colorNA= NULL,
+          legend.hist=T) +
+  tm_layout(legend.format = list(text.separator= " a "),
+            legend.outside = TRUE,
+            legend.hist.width = 2.5)
 
 
-## ------------------------------------------------------------------------
 
 
-tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC", style = "quantile") +
-  tm_borders() +
-  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
-  tm_facets("SISTEMA")  +
+## ----tmap-dosObjetos, fig.show = 'hide', results = 'hide'----------------
+cuencas_tmap +
+muestreo_tmap
+
+
+
+
+## ----tmap-escala, fig.show = 'hide', results = 'hide'--------------------
+cuencas_tmap +
+muestreo_tmap +
   tm_scale_bar() +
   tm_compass(position = c( "right", "top"))
 
 
 
-## ------------------------------------------------------------------------
-tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC", style = "quantile") +
-  tm_borders() +
-  tm_symbols(size = "AREA", col="blue", title.size = "Area") +
-  tm_facets("SISTEMA")  +
-  tm_scale_bar() +
-  tm_compass(position = c( "right", "top")) +
-  tm_layout(legend.format = list(text.separator= " a ", text.align = "left"))
 
 
-
-## ------------------------------------------------------------------------
-tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", palette="RdYlGn", title.size = "Media CC", style = "cont",
-          textNA="Sin Muestras") +
-  tm_borders() +
-  tm_facets("SISTEMA")  +
-  tm_scale_bar(text.size = 10) +
-  tm_compass(type = "rose", position = c( "right", "top"), size = 2)
-
-
-
-## ------------------------------------------------------------------------
+## ---- fig.height=4.5-----------------------------------------------------
 tmap_cuencas <- tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", style = "quantile") +
+  tm_fill("MediaLimo", style = "quantile") +
   tm_borders() +
-  tm_basemap() +
-  tm_view(alpha = 1, basemaps = "Esri.WorldTopoMap")
+  tm_legend(legend.outside = TRUE)
 tmap_cuencas
 
 
 
 
-## ------------------------------------------------------------------------
+## ---- fig.height=4.5-----------------------------------------------------
 tmap_muestreo <-   tm_shape(muestreo) +
   tm_bubbles(col = "K", style = "cont", textNA = "Sin dato") +
-  tm_basemap()
+  tm_legend(legend.outside = TRUE)
 tmap_muestreo
 
 
 
-## ------------------------------------------------------------------------
+## ---- fig.width=7--------------------------------------------------------
 tmap_arrange(tmap_cuencas, tmap_muestreo)
 
 
 
-## ----tmap-cuencasMuestreo, fig.show = 'hide', results = 'hide'-----------
+## ---- fig.width=4--------------------------------------------------------
+tmap_mode("view")
 tm_shape(cuencasUTM) +
-  tm_fill("MediaCC", style = "quantile") +
+  tm_fill("MediaLimo", palette="RdYlGn", title.size = "Media Limo") +
   tm_borders() +
-  tm_basemap() +
-tm_shape(muestreo) +
-  tm_bubbles(col = "K", style = "cont") +
-  tm_basemap()
-
-
-
+  tm_facets("SISTEMA", nrow = 1, sync = TRUE) +
+  tm_basemap("OpenStreetMap") +
+  tmap_options(limits = c(facets.view = 7))
 
 
 
@@ -518,7 +562,7 @@ tm_shape(muestreo) +
 leaflet() %>%
   addTiles() %>%
   addCircles(data = muestreoLatLong) %>%
-  addMiniMap(position = "topleft" , width = 150, height = 150)
+  addMiniMap(position = "topleft" , width = 150, height = 150,toggleDisplay = TRUE) 
 
 
 
@@ -527,11 +571,6 @@ leaflet() %>%
 leaflet() %>%
   addTiles() %>%
   addCircles(data = muestreoLatLong) %>%
-  addMiniMap(position = "topleft" , width = 150, height = 150) %>%
   addLogo("https://media.giphy.com/media/l1LcbeAkRm2UrdNio/giphy.gif",
-          position = "bottomleft",offset.x = 5, offset.y = 100, width = 480, height = 270) 
-
-
-## ---- results='asis', echo = FALSE---------------------------------------
-PrintBibliography(bib)
+          position = "bottomleft",offset.x = 5, offset.y = 100, width = 480, height = 270)
 

@@ -81,7 +81,7 @@ options(htmltools.dir.version = FALSE)
 ```
 
 
-```{r cargaLibrerias, echo=FALSE, eval=FALSE}
+```{r cargaLibrerias, echo=FALSE, include=FALSE}
 # Esto es un comentario
 # Esta es otra linea de comentario
 # ahora vamos a sumar algo
@@ -96,6 +96,7 @@ resultado
 #Comencemos instalando paquetes especializados
 libs <- c("sf", "ggmap", "prettymapr",
           "tmap", "leaflet","leafem", "ggplot2","units","ggsn","ggspatial")
+
 new.packages <- libs[!(libs %in% rownames(installed.packages()))]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -862,7 +863,7 @@ ggplot() +
 
 .pull-right[
 
-```{r, fig.height=5}
+```{r, fig.height=5.5}
 ggCuencasMuestero <- ggplot() +
   geom_sf(data = cuencas) +
   geom_sf(data = muestreo, aes(color = Limo), size = 3) 
@@ -1398,13 +1399,14 @@ tmap_arrange(tmap_cuencas, tmap_muestreo)
 
 ---
 
-```{r, fig.width=7}
+```{r, fig.width=4}
 tmap_mode("view")
 tm_shape(cuencasUTM) +
   tm_fill("MediaLimo", palette="RdYlGn", title.size = "Media Limo") +
   tm_borders() +
   tm_facets("SISTEMA", nrow = 1, sync = TRUE) +
-  tm_basemap("OpenStreetMap")
+  tm_basemap("OpenStreetMap") +
+  tmap_options(limits = c(facets.view = 7))
 
 ```
 
@@ -1440,3 +1442,12 @@ leaflet() %>%
 PrintBibliography(bib)
 ```
 ]
+
+---
+
+layout: false
+class: inverse, middle, center
+
+# Muchas Gracias!!!
+
+
