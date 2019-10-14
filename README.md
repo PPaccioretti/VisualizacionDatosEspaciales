@@ -1,5 +1,6 @@
 # Visualización de Datos Geoespaciales en R
 Ing. Agr. Pablo Paccioretti (UNC-CONICET- Argentina) - pablopaccioretti@agro.unc.edu.ar
+
 Dra. Cecilia Bruno (UNC-CONICET- Argentina) - cebruno@agro.unc.edu.ar
 
 ## JUSTIFICACIÓN
