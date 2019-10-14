@@ -17,12 +17,12 @@ cuenta con paquetes especializados para el manejo, análisis y visualización de
 ## CONTENIDOS MÍNIMOS:
 ### Módulo 1:
 1. Manejo de archivos geo-referenciados con el paquete sf
-- Lectura de archivos de diferentes formatos
+ - Lectura de archivos de diferentes formatos
  - Shapefile
  - Geopackage
  - Base de datos de archivo de texto
-- Proyección y reproyección del sistema de coordenadas
-- Herramientas para el manejo de objetos de clase sf
+ - Proyección y reproyección del sistema de coordenadas
+ - Herramientas para el manejo de objetos de clase sf
 
 ### Módulo 2:
 2. Visualización con el paquete `ggplot2`
